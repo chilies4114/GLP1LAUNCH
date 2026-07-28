@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Allow: /glp1/top-questions
+Allow: /openapi.json
+Allow: /ai.txt
+
+# AI Agent specific directives
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+# OpenAPI spec location
+Sitemap: https://glp1launch-1.onrender.com/sitemap.xml

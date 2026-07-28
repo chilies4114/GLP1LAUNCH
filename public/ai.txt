@@ -1,0 +1,55 @@
+# GLP1 Launch API - AI Agent Information
+
+## API Information
+Name: GLP1 Launch API
+Description: Trending GLP-1 medication questions and premium insights API
+Version: 1.0.0
+Base URL: https://glp1launch-1.onrender.com
+
+## OpenAPI Specification
+OpenAPI: https://glp1launch-1.onrender.com/openapi.json
+
+## Endpoints
+
+### Free Endpoint
+URL: https://glp1launch-1.onrender.com/glp1/top-questions
+Method: GET
+Authentication: None
+Cost: Free
+Description: Returns trending GLP-1 medication questions with basic information
+Use Case: General GLP-1 information queries, trending health topics
+
+### Paid Endpoint
+URL: https://glp1launch-1.onrender.com/glp1/top-questions-paid
+Method: GET
+Authentication: x402 payment protocol
+Cost: $0.01 USD
+Network: Base (eip155:8453)
+Payment Address: 0x0095494D8F023D7a962F92780cb37C913df025bf
+Description: Premium GLP-1 insights with detailed answers, expert sources, and ratings
+Use Case: Detailed GLP-1 research, expert-backed health information
+
+## Payment Protocol
+Protocol: x402
+Network: Base Mainnet (Chain ID: 8453)
+Price: $0.01 per request (paid endpoint only)
+
+## Categories
+- GLP-1 medications
+- Weight loss
+- Diabetes management
+- Healthcare information
+- Medication questions
+
+## Contact
+GitHub: https://github.com/chilies4114/GLP1LAUNCH
+Live URL: https://glp1launch-1.onrender.com
+
+## AI Agent Usage
+This API is designed to be AI-accessible. Agents can:
+1. Access free endpoint without authentication
+2. Pay $0.01 via x402 for premium content
+3. Parse OpenAPI spec for integration
+
+## Keywords
+GLP-1, Ozempic, Wegovy, Mounjaro, weight loss, diabetes, semaglutide, tirzepatide, medication questions, health API

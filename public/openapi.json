@@ -1,0 +1,228 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "GLP1 Launch API",
+    "description": "AI-accessible API for trending GLP-1 medication questions and premium insights. Free and paid endpoints available.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "GLP1 Launch API Support",
+      "url": "https://github.com/chilies4114/GLP1LAUNCH"
+    },
+    "x-logo": {
+      "url": "https://glp1launch-1.onrender.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://glp1launch-1.onrender.com",
+      "description": "Production server"
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Returns API status and confirms the service is running",
+        "operationId": "healthCheck",
+        "responses": {
+          "200": {
+            "description": "API is running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "GLP1 API running"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/glp1/top-questions": {
+      "get": {
+        "summary": "Get Trending GLP-1 Questions (Free)",
+        "description": "Returns a list of the top trending GLP-1 medication questions with basic information. No payment required. Great for AI agents to access general GLP-1 information.",
+        "operationId": "getTopQuestions",
+        "tags": ["GLP-1", "Free", "Health"],
+        "responses": {
+          "200": {
+            "description": "Successful response with trending questions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "question": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "trending_score": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/glp1/top-questions-paid": {
+      "get": {
+        "summary": "Get Premium GLP-1 Insights (Paid - $0.01)",
+        "description": "Returns premium GLP-1 insights with detailed answers, expert sources, ratings, and additional context. Requires payment of $0.01 via x402 protocol on Base network (Chain ID: 8453). Payment address: 0x0095494D8F023D7a962F92780cb37C913df025bf",
+        "operationId": "getTopQuestionsPaid",
+        "tags": ["GLP-1", "Paid", "Premium", "Health"],
+        "x-payment": {
+          "protocol": "x402",
+          "scheme": "exact",
+          "network": "eip155:8453",
+          "price": "0.01",
+          "currency": "USD",
+          "payTo": "0x0095494D8F023D7a962F92780cb37C913df025bf"
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with premium insights (after payment)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "question": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "trending_score": {
+                            "type": "integer"
+                          },
+                          "detailed_answer": {
+                            "type": "string"
+                          },
+                          "sources": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "expert_rating": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    },
+                    "premium_features": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required - Must pay $0.01 on Base network",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "payment_details": {
+                      "type": "object",
+                      "properties": {
+                        "scheme": {
+                          "type": "string"
+                        },
+                        "network": {
+                          "type": "string"
+                        },
+                        "price": {
+                          "type": "string"
+                        },
+                        "payTo": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "GLP-1",
+      "description": "GLP-1 medication information and insights"
+    },
+    {
+      "name": "Free",
+      "description": "Free endpoints - no payment required"
+    },
+    {
+      "name": "Paid",
+      "description": "Paid endpoints - require micropayment via x402"
+    },
+    {
+      "name": "Premium",
+      "description": "Premium content with detailed answers and expert sources"
+    },
+    {
+      "name": "Health",
+      "description": "Healthcare and medication information"
+    }
+  ]
+}

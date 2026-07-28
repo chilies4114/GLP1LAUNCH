@@ -12,7 +12,9 @@ app.use(express.static('public'));
 app.get('/', (req, res) => {
   res.json({ 
     status: "ok", 
-    message: "GLP1 API running" 
+    message: "GLP1 API running",
+    openapi: "https://glp1launch-1.onrender.com/openapi.json",
+    ai_info: "https://glp1launch-1.onrender.com/ai.txt"
   });
 });
 
