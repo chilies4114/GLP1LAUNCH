@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GLP1 Launch - API Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .wallet-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .wallet-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #28a745;
+        }
+        
+        .wallet-info p {
+            margin: 8px 0;
+            color: #333;
+        }
+        
+        .wallet-info strong {
+            color: #667eea;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        
+        .warning-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .warning-box p {
+            color: #856404;
+            line-height: 1.6;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .api-section {
+            margin: 30px 0;
+        }
+        
+        .api-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        
+        .endpoint-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .endpoint-group h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .endpoint-group p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .response-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .badge-free {
+            background: #28a745;
+            color: white;
+        }
+        
+        .badge-paid {
+            background: #ffc107;
+            color: #333;
+        }
+        
+        .loading {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 14px;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 GLP1 Launch</h1>
+        <p class="subtitle">Connect your MetaMask wallet to test the API endpoints</p>
+        
+        <!-- Wallet Connection Section -->
+        <div class="wallet-section">
+            <h2>💳 Wallet Connection</h2>
+            <button id="connectBtn" onclick="connectWallet()">Connect MetaMask</button>
+            <button id="disconnectBtn" onclick="disconnectWallet()" style="display: none; background: #dc3545;">Disconnect</button>
+            
+            <div id="walletInfo" style="display: none;" class="wallet-info">
+                <p><strong>Connected Address:</strong> <span id="walletAddress"></span></p>
+                <p><strong>Network:</strong> <span id="networkName"></span> (Chain ID: <span id="chainId"></span>)</p>
+            </div>
+        </div>
+        
+        <div class="warning-box">
+            <h3>⚠️ Deployment Note</h3>
+            <p>
+                <strong>Your connected MetaMask wallet address will be used as the PAY_TO address for deployment.</strong>
+                This is where payment for the paid endpoint will be sent. Make sure you're connected with the wallet 
+                you want to receive payments on Base network (Chain ID: 8453).
+            </p>
+            <p style="margin-top: 10px;">
+                <strong>Important:</strong> No private keys are stored or transmitted. The payment happens on-chain via x402 protocol.
+            </p>
+        </div>
+        
+        <!-- API Endpoints Section -->
+        <div class="api-section">
+            <h2>📡 API Endpoints</h2>
+            
+            <div class="endpoint-group">
+                <h3>GET /glp1/top-questions <span class="badge badge-free">FREE</span></h3>
+                <p>Returns a list of trending GLP-1 questions with basic information. No payment required.</p>
+                <button onclick="callFreeEndpoint()">Call Free Endpoint</button>
+                <div id="freeResponse" class="response-box" style="display: none;"></div>
+            </div>
+            
+            <div class="endpoint-group">
+                <h3>GET /glp1/top-questions-paid <span class="badge badge-paid">$0.01 USD</span></h3>
+                <p>
+                    Returns premium GLP-1 insights with detailed answers, expert sources, and ratings. 
+                    <strong>Requires payment of $0.01 on Base network.</strong>
+                </p>
+                <p style="color: #dc3545; font-weight: 600;">
+                    ⚡ You must connect your MetaMask wallet and be on Base network (Chain ID: 8453) to access this endpoint.
+                </p>
+                <button id="paidBtn" onclick="callPaidEndpoint()" disabled>Call Paid Endpoint (Connect Wallet First)</button>
+                <div id="paidResponse" class="response-box" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentAccount = null;
+        let currentChainId = null;
+
+        // Check if MetaMask is installed
+        function checkMetaMask() {
+            if (typeof window.ethereum === 'undefined') {
+                alert('MetaMask is not installed! Please install MetaMask to use this app.');
+                return false;
+            }
+            return true;
+        }
+
+        // Connect to MetaMask
+        async function connectWallet() {
+            if (!checkMetaMask()) return;
+
+            try {
+                // Request account access
+                const accounts = await window.ethereum.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                
+                currentAccount = accounts[0];
+                
+                // Get chain ID
+                currentChainId = await window.ethereum.request({ 
+                    method: 'eth_chainId' 
+                });
+                
+                updateWalletUI();
+                enablePaidButton();
+                
+                // Listen for account changes
+                window.ethereum.on('accountsChanged', handleAccountsChanged);
+                window.ethereum.on('chainChanged', handleChainChanged);
+                
+            } catch (error) {
+                console.error('Error connecting to MetaMask:', error);
+                alert('Failed to connect to MetaMask: ' + error.message);
+            }
+        }
+
+        // Disconnect wallet
+        function disconnectWallet() {
+            currentAccount = null;
+            currentChainId = null;
+            document.getElementById('walletInfo').style.display = 'none';
+            document.getElementById('connectBtn').style.display = 'inline-block';
+            document.getElementById('disconnectBtn').style.display = 'none';
+            document.getElementById('paidBtn').disabled = true;
+            document.getElementById('paidBtn').textContent = 'Call Paid Endpoint (Connect Wallet First)';
+        }
+
+        // Update wallet UI
+        function updateWalletUI() {
+            const chainIdDecimal = parseInt(currentChainId, 16);
+            const networkName = getNetworkName(chainIdDecimal);
+            
+            document.getElementById('walletAddress').textContent = currentAccount;
+            document.getElementById('chainId').textContent = chainIdDecimal;
+            document.getElementById('networkName').textContent = networkName;
+            document.getElementById('walletInfo').style.display = 'block';
+            document.getElementById('connectBtn').style.display = 'none';
+            document.getElementById('disconnectBtn').style.display = 'inline-block';
+        }
+
+        // Enable paid endpoint button
+        function enablePaidButton() {
+            const chainIdDecimal = parseInt(currentChainId, 16);
+            const btn = document.getElementById('paidBtn');
+            btn.disabled = false;
+            
+            if (chainIdDecimal !== 8453) {
+                btn.textContent = 'Switch to Base Network to Pay';
+                btn.style.background = '#ffc107';
+            } else {
+                btn.textContent = 'Call Paid Endpoint ($0.01)';
+                btn.style.background = '#667eea';
+            }
+        }
+
+        // Get network name from chain ID
+        function getNetworkName(chainId) {
+            const networks = {
+                1: 'Ethereum Mainnet',
+                5: 'Goerli Testnet',
+                8453: 'Base Mainnet',
+                84532: 'Base Sepolia Testnet',
+                137: 'Polygon',
+                80001: 'Mumbai Testnet'
+            };
+            return networks[chainId] || 'Unknown Network';
+        }
+
+        // Handle account changes
+        function handleAccountsChanged(accounts) {
+            if (accounts.length === 0) {
+                disconnectWallet();
+            } else {
+                currentAccount = accounts[0];
+                updateWalletUI();
+            }
+        }
+
+        // Handle chain changes
+        function handleChainChanged(chainId) {
+            currentChainId = chainId;
+            updateWalletUI();
+            enablePaidButton();
+        }
+
+        // Switch to Base network
+        async function switchToBase() {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x2105' }], // 8453 in hex
+                });
+            } catch (switchError) {
+                // Chain not added, try adding it
+                if (switchError.code === 4902) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_addEthereumChain',
+                            params: [{
+                                chainId: '0x2105',
+                                chainName: 'Base Mainnet',
+                                nativeCurrency: {
+                                    name: 'Ethereum',
+                                    symbol: 'ETH',
+                                    decimals: 18
+                                },
+                                rpcUrls: ['https://mainnet.base.org'],
+                                blockExplorerUrls: ['https://basescan.org']
+                            }]
+                        });
+                    } catch (addError) {
+                        console.error('Error adding Base network:', addError);
+                        alert('Failed to add Base network: ' + addError.message);
+                    }
+                } else {
+                    console.error('Error switching network:', switchError);
+                    alert('Failed to switch network: ' + switchError.message);
+                }
+            }
+        }
+
+        // Call free endpoint
+        async function callFreeEndpoint() {
+            const responseDiv = document.getElementById('freeResponse');
+            responseDiv.style.display = 'block';
+            responseDiv.textContent = 'Loading...';
+
+            try {
+                const response = await fetch('/glp1/top-questions');
+                const data = await response.json();
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Call paid endpoint
+        async function callPaidEndpoint() {
+            if (!currentAccount) {
+                alert('Please connect your MetaMask wallet first!');
+                return;
+            }
+
+            const chainIdDecimal = parseInt(currentChainId, 16);
+            
+            // Check if on Base network
+            if (chainIdDecimal !== 8453) {
+                const confirmed = confirm('You need to be on Base network (Chain ID: 8453) to access the paid endpoint. Switch now?');
+                if (confirmed) {
+                    await switchToBase();
+                }
+                return;
+            }
+
+            const responseDiv = document.getElementById('paidResponse');
+            responseDiv.style.display = 'block';
+            responseDiv.textContent = 'Loading... (Payment may be required)';
+
+            try {
+                const response = await fetch('/glp1/top-questions-paid');
+                const data = await response.json();
+                responseDiv.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseDiv.textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Auto-connect if previously connected
+        window.addEventListener('load', async () => {
+            if (checkMetaMask()) {
+                const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+                if (accounts.length > 0) {
+                    currentAccount = accounts[0];
+                    currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+                    updateWalletUI();
+                    enablePaidButton();
+                    
+                    // Listen for changes
+                    window.ethereum.on('accountsChanged', handleAccountsChanged);
+                    window.ethereum.on('chainChanged', handleChainChanged);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
