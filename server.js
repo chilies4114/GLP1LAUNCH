@@ -5,6 +5,7 @@ const { HTTPFacilitatorClient } = require('@x402/core/server');
 const { ExactEvmScheme } = require('@x402/evm/exact/server');
 const { facilitator } = require('@coinbase/x402');
 const { declareDiscoveryExtension } = require('@x402/extensions/bazaar');
+const { getPremiumPayload } = require('./glp1-data');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -132,81 +133,7 @@ app.get('/glp1/top-questions', (req, res) => {
 // Paid endpoint - protected by x402 middleware above.
 // Requests only reach this handler after payment is verified & settled.
 app.get('/glp1/top-questions-paid', (req, res) => {
-  res.json({
-    success: true,
-    message: "Premium GLP-1 insights (paid access)",
-    data: [
-      {
-        id: 1,
-        question: "What is GLP-1 and how does it work?",
-        category: "basics",
-        trending_score: 95,
-        detailed_answer: "GLP-1 (Glucagon-Like Peptide-1) is a hormone naturally produced in your intestines. It helps regulate blood sugar, slows digestion, and signals fullness to your brain.",
-        sources: ["NEJM", "Diabetes Care Journal"],
-        expert_rating: 4.8
-      },
-      {
-        id: 2,
-        question: "What are the side effects of GLP-1 medications?",
-        category: "safety",
-        trending_score: 88,
-        detailed_answer: "Common side effects include nausea, vomiting, diarrhea, and constipation. These usually decrease over time. Rare but serious side effects can include pancreatitis.",
-        sources: ["FDA", "Clinical Trial Data"],
-        expert_rating: 4.6
-      },
-      {
-        id: 3,
-        question: "How much weight can I lose with GLP-1?",
-        category: "results",
-        trending_score: 92,
-        detailed_answer: "Clinical trials show average weight loss of 15-20% of body weight over 68 weeks. Individual results vary based on diet, exercise, and adherence.",
-        sources: ["NEJM Trial Results", "Obesity Medicine"],
-        expert_rating: 4.9
-      },
-      {
-        id: 4,
-        question: "Are GLP-1 medications covered by insurance?",
-        category: "cost",
-        trending_score: 85,
-        detailed_answer: "Coverage varies. Most insurance covers GLP-1 for diabetes management. Weight loss coverage depends on your plan and may require prior authorization.",
-        sources: ["Insurance Provider Data", "Healthcare.gov"],
-        expert_rating: 4.3
-      },
-      {
-        id: 5,
-        question: "Can I stop taking GLP-1 after reaching my goal weight?",
-        category: "usage",
-        trending_score: 79,
-        detailed_answer: "Most patients regain weight after stopping. GLP-1 medications are typically considered long-term treatments. Consult your doctor before discontinuing.",
-        sources: ["Endocrinology Association", "Long-term Studies"],
-        expert_rating: 4.7
-      },
-      {
-        id: 6,
-        question: "What's the difference between Ozempic, Wegovy, and Mounjaro?",
-        category: "medications",
-        trending_score: 94,
-        detailed_answer: "Ozempic (semaglutide) is FDA-approved for diabetes. Wegovy (higher-dose semaglutide) is for weight loss. Mounjaro (tirzepatide) is a dual GIP/GLP-1 agonist.",
-        sources: ["FDA Approval Documents", "Comparative Studies"],
-        expert_rating: 4.9
-      },
-      {
-        id: 7,
-        question: "How long does it take to see results?",
-        category: "timeline",
-        trending_score: 86,
-        detailed_answer: "Most patients notice appetite suppression within 1-2 weeks. Significant weight loss typically begins around week 4-8 with peak effects at 6+ months.",
-        sources: ["Clinical Trial Timelines", "Patient Reports"],
-        expert_rating: 4.5
-      }
-    ],
-    premium_features: {
-      detailed_answers: true,
-      expert_sources: true,
-      ratings_included: true,
-      additional_insights: 2
-    }
-  });
+  res.json(getPremiumPayload());
 });
 
 // Start server
