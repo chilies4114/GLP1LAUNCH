@@ -286,6 +286,91 @@
           }
         }
       }
+    },
+    "/peptides/longevity": {
+      "get": {
+        "summary": "Get Peptide & Longevity Questions (Free)",
+        "description": "Returns trending peptide and longevity questions with basic information. No payment required. Great for AI agents to access general peptide/longevity information.",
+        "operationId": "getPeptideLongevity",
+        "tags": ["Peptides", "Free", "Health"],
+        "responses": {
+          "200": {
+            "description": "Successful response with peptide & longevity questions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer" },
+                          "question": { "type": "string" },
+                          "category": { "type": "string" },
+                          "trending_score": { "type": "integer" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/peptides/longevity-paid": {
+      "get": {
+        "summary": "Get Premium Peptide & Longevity Insights (Paid - $0.01)",
+        "description": "Returns premium peptide & longevity insights with detailed answers, FDA/legal status, evidence levels, safety flags, expert sources, and ratings. Requires payment of $0.01 via x402 protocol on Base network (Chain ID: 8453). Payment address: 0x0095494D8F023D7a962F92780cb37C913df025bf",
+        "operationId": "getPeptideLongevityPaid",
+        "tags": ["Peptides", "Paid", "Premium", "Health"],
+        "x-payment": {
+          "protocol": "x402",
+          "scheme": "exact",
+          "network": "eip155:8453",
+          "price": "0.01",
+          "currency": "USD",
+          "payTo": "0x0095494D8F023D7a962F92780cb37C913df025bf"
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with premium peptide insights (after payment)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": { "type": "array", "items": { "type": "object" } },
+                    "compound_reference": { "type": "array", "items": { "type": "object" } },
+                    "premium_features": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required - Must pay $0.01 on Base network",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "tags": [
@@ -296,6 +381,10 @@
     {
       "name": "Supplements",
       "description": "Supplement and vitamin interaction information and insights"
+    },
+    {
+      "name": "Peptides",
+      "description": "Peptide and longevity compound information and insights"
     },
     {
       "name": "Free",

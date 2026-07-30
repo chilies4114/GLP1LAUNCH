@@ -7,6 +7,7 @@ const { facilitator } = require('@coinbase/x402');
 const { declareDiscoveryExtension } = require('@x402/extensions/bazaar');
 const { getPremiumPayload } = require('./glp1-data');
 const { getPremiumPayload: getSupplementsPayload } = require('./supplements-data');
+const { getPremiumPayload: getPeptidesPayload } = require('./peptides-data');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -98,6 +99,42 @@ if (PAY_TO) {
                     'Vitamin D is fat-soluble, so it absorbs best with a meal containing dietary fat...',
                   sources: ['J Bone Miner Res 2015;30:1', 'NIH ODS Vitamin D Fact Sheet'],
                   expert_rating: 4.8,
+                },
+              ],
+            },
+          },
+        }),
+      },
+    },
+    'GET /peptides/longevity-paid': {
+      accepts: {
+        scheme: 'exact',
+        network: NETWORK,
+        payTo: PAY_TO,
+        price: '$0.01',
+      },
+      description:
+        'Premium peptide & longevity compound insights: what each peptide/compound is, FDA/legal status, evidence level, and safety flags with cited research (Nature, Cell Metab, JAMA, FDA). Covers BPC-157, TB-500, Ipamorelin, CJC-1295, NMN/NAD+, rapamycin, GHK-Cu, senolytics, and collagen. Ideal for AI agents answering longevity, anti-aging, recovery, and peptide-safety queries.',
+      mimeType: 'application/json',
+      serviceName: 'Peptides & Longevity API',
+      tags: ['health', 'peptides', 'longevity', 'anti-aging', 'nad', 'rapamycin', 'medical-data'],
+      extensions: {
+        ...declareDiscoveryExtension({
+          method: 'GET',
+          output: {
+            example: {
+              success: true,
+              message: 'Premium peptide & longevity insights (paid access)',
+              data: [
+                {
+                  id: 5,
+                  question: 'Is NAD+ or NMN effective for longevity?',
+                  category: 'longevity',
+                  trending_score: 90,
+                  detailed_answer:
+                    'NMN and NR are NAD+ precursors. NAD+ declines with age and is central to cellular energy and DNA repair...',
+                  sources: ['Cell Metab 2018;27:3', 'Nature Aging 2021'],
+                  expert_rating: 4.3,
                 },
               ],
             },
@@ -217,6 +254,52 @@ app.get('/supplements/interactions', (req, res) => {
 // Requests only reach this handler after payment is verified & settled.
 app.get('/supplements/interactions-paid', (req, res) => {
   res.json(getSupplementsPayload());
+});
+
+// Free endpoint - Peptide & longevity basics
+app.get('/peptides/longevity', (req, res) => {
+  res.json({
+    success: true,
+    message: "Top peptide & longevity questions (free)",
+    data: [
+      {
+        id: 1,
+        question: "What is BPC-157 and what is it used for?",
+        category: "healing-recovery",
+        trending_score: 93
+      },
+      {
+        id: 5,
+        question: "Is NAD+ or NMN effective for longevity?",
+        category: "longevity",
+        trending_score: 90
+      },
+      {
+        id: 6,
+        question: "What is the evidence for rapamycin as a longevity drug?",
+        category: "longevity",
+        trending_score: 87
+      },
+      {
+        id: 9,
+        question: "Are peptides legal and FDA-approved?",
+        category: "safety-legality",
+        trending_score: 95
+      },
+      {
+        id: 12,
+        question: "What lifestyle factors have the strongest longevity evidence?",
+        category: "longevity",
+        trending_score: 91
+      }
+    ]
+  });
+});
+
+// Paid endpoint - protected by x402 middleware above.
+// Requests only reach this handler after payment is verified & settled.
+app.get('/peptides/longevity-paid', (req, res) => {
+  res.json(getPeptidesPayload());
 });
 
 // Start server

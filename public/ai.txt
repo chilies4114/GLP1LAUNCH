@@ -47,6 +47,24 @@ Payment Address: 0x0095494D8F023D7a962F92780cb37C913df025bf
 Description: Premium supplement & vitamin interaction insights — absorption optimization, timing, and drug-interaction flags with cited research
 Use Case: Detailed supplement research, safe vitamin/mineral/drug combinations
 
+### Free Endpoint (Peptides & Longevity)
+URL: https://glp1launch-1.onrender.com/peptides/longevity
+Method: GET
+Authentication: None
+Cost: Free
+Description: Returns trending peptide & longevity questions with basic information
+Use Case: General peptide/longevity/anti-aging queries
+
+### Paid Endpoint (Peptides & Longevity)
+URL: https://glp1launch-1.onrender.com/peptides/longevity-paid
+Method: GET
+Authentication: x402 payment protocol
+Cost: $0.01 USD
+Network: Base (eip155:8453)
+Payment Address: 0x0095494D8F023D7a962F92780cb37C913df025bf
+Description: Premium peptide & longevity insights — FDA/legal status, evidence levels, and safety flags with cited research
+Use Case: Detailed peptide/longevity research, anti-aging compound safety and evidence
+
 ## Payment Protocol
 Protocol: x402
 Network: Base Mainnet (Chain ID: 8453)
@@ -70,4 +88,4 @@ This API is designed to be AI-accessible. Agents can:
 3. Parse OpenAPI spec for integration
 
 ## Keywords
-GLP-1, Ozempic, Wegovy, Mounjaro, weight loss, diabetes, semaglutide, tirzepatide, medication questions, health API, supplements, vitamins, supplement interactions, vitamin D, magnesium, iron, zinc, fish oil, probiotics, creatine, drug interactions, nutrition
+GLP-1, Ozempic, Wegovy, Mounjaro, weight loss, diabetes, semaglutide, tirzepatide, medication questions, health API, supplements, vitamins, supplement interactions, vitamin D, magnesium, iron, zinc, fish oil, probiotics, creatine, drug interactions, nutrition, peptides, longevity, anti-aging, BPC-157, TB-500, Ipamorelin, CJC-1295, NMN, NAD+, rapamycin, GHK-Cu, senolytics, collagen peptides
