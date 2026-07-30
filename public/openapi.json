@@ -201,12 +201,101 @@
           }
         }
       }
+    },
+    "/supplements/interactions": {
+      "get": {
+        "summary": "Get Supplement & Vitamin Interaction Questions (Free)",
+        "description": "Returns trending supplement and vitamin interaction questions with basic information. No payment required. Great for AI agents to access general supplement/nutrition information.",
+        "operationId": "getSupplementInteractions",
+        "tags": ["Supplements", "Free", "Health"],
+        "responses": {
+          "200": {
+            "description": "Successful response with supplement interaction questions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "integer" },
+                          "question": { "type": "string" },
+                          "category": { "type": "string" },
+                          "trending_score": { "type": "integer" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/supplements/interactions-paid": {
+      "get": {
+        "summary": "Get Premium Supplement Interaction Insights (Paid - $0.01)",
+        "description": "Returns premium supplement & vitamin interaction insights with detailed answers, absorption optimization, timing guidance, drug-interaction flags, expert sources, and ratings. Requires payment of $0.01 via x402 protocol on Base network (Chain ID: 8453). Payment address: 0x0095494D8F023D7a962F92780cb37C913df025bf",
+        "operationId": "getSupplementInteractionsPaid",
+        "tags": ["Supplements", "Paid", "Premium", "Health"],
+        "x-payment": {
+          "protocol": "x402",
+          "scheme": "exact",
+          "network": "eip155:8453",
+          "price": "0.01",
+          "currency": "USD",
+          "payTo": "0x0095494D8F023D7a962F92780cb37C913df025bf"
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with premium supplement insights (after payment)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "data": { "type": "array", "items": { "type": "object" } },
+                    "pairing_guide": { "type": "array", "items": { "type": "object" } },
+                    "premium_features": { "type": "object" }
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment Required - Must pay $0.01 on Base network",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": { "type": "string" },
+                    "message": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "tags": [
     {
       "name": "GLP-1",
       "description": "GLP-1 medication information and insights"
+    },
+    {
+      "name": "Supplements",
+      "description": "Supplement and vitamin interaction information and insights"
     },
     {
       "name": "Free",

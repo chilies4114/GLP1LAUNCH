@@ -6,6 +6,7 @@ const { ExactEvmScheme } = require('@x402/evm/exact/server');
 const { facilitator } = require('@coinbase/x402');
 const { declareDiscoveryExtension } = require('@x402/extensions/bazaar');
 const { getPremiumPayload } = require('./glp1-data');
+const { getPremiumPayload: getSupplementsPayload } = require('./supplements-data');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -60,6 +61,42 @@ if (PAY_TO) {
                   detailed_answer:
                     'GLP-1 (Glucagon-Like Peptide-1) is a hormone naturally produced in your intestines...',
                   sources: ['NEJM', 'Diabetes Care Journal'],
+                  expert_rating: 4.8,
+                },
+              ],
+            },
+          },
+        }),
+      },
+    },
+    'GET /supplements/interactions-paid': {
+      accepts: {
+        scheme: 'exact',
+        network: NETWORK,
+        payTo: PAY_TO,
+        price: '$0.01',
+      },
+      description:
+        'Premium supplement & vitamin interaction insights: how to combine vitamins, minerals, and supplements safely — absorption optimization, timing, and drug-interaction flags with cited research (NIH, NEJM, Cochrane). Ideal for AI agents answering health/nutrition queries about vitamin D, magnesium, iron, zinc, fish oil, probiotics, creatine, and supplement-drug interactions.',
+      mimeType: 'application/json',
+      serviceName: 'Supplement Interactions API',
+      tags: ['health', 'supplements', 'vitamins', 'nutrition', 'drug-interactions', 'medical-data'],
+      extensions: {
+        ...declareDiscoveryExtension({
+          method: 'GET',
+          output: {
+            example: {
+              success: true,
+              message: 'Premium supplement & vitamin interaction insights (paid access)',
+              data: [
+                {
+                  id: 2,
+                  question: 'Does vitamin D need to be taken with anything to absorb?',
+                  category: 'absorption',
+                  trending_score: 94,
+                  detailed_answer:
+                    'Vitamin D is fat-soluble, so it absorbs best with a meal containing dietary fat...',
+                  sources: ['J Bone Miner Res 2015;30:1', 'NIH ODS Vitamin D Fact Sheet'],
                   expert_rating: 4.8,
                 },
               ],
@@ -134,6 +171,52 @@ app.get('/glp1/top-questions', (req, res) => {
 // Requests only reach this handler after payment is verified & settled.
 app.get('/glp1/top-questions-paid', (req, res) => {
   res.json(getPremiumPayload());
+});
+
+// Free endpoint - Supplement & vitamin interaction basics
+app.get('/supplements/interactions', (req, res) => {
+  res.json({
+    success: true,
+    message: "Top supplement & vitamin interaction questions (free)",
+    data: [
+      {
+        id: 1,
+        question: "Can I take magnesium with calcium?",
+        category: "mineral-interactions",
+        trending_score: 88
+      },
+      {
+        id: 2,
+        question: "Does vitamin D need to be taken with anything to absorb?",
+        category: "absorption",
+        trending_score: 94
+      },
+      {
+        id: 3,
+        question: "Is it safe to take iron with vitamin C?",
+        category: "absorption",
+        trending_score: 90
+      },
+      {
+        id: 4,
+        question: "Does fish oil interact with blood thinners?",
+        category: "drug-interactions",
+        trending_score: 91
+      },
+      {
+        id: 5,
+        question: "Can I take probiotics with antibiotics?",
+        category: "timing",
+        trending_score: 87
+      }
+    ]
+  });
+});
+
+// Paid endpoint - protected by x402 middleware above.
+// Requests only reach this handler after payment is verified & settled.
+app.get('/supplements/interactions-paid', (req, res) => {
+  res.json(getSupplementsPayload());
 });
 
 // Start server

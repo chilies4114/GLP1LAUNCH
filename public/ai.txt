@@ -29,6 +29,24 @@ Payment Address: 0x0095494D8F023D7a962F92780cb37C913df025bf
 Description: Premium GLP-1 insights with detailed answers, expert sources, and ratings
 Use Case: Detailed GLP-1 research, expert-backed health information
 
+### Free Endpoint (Supplements)
+URL: https://glp1launch-1.onrender.com/supplements/interactions
+Method: GET
+Authentication: None
+Cost: Free
+Description: Returns trending supplement & vitamin interaction questions with basic information
+Use Case: General supplement/nutrition queries, vitamin timing and pairing
+
+### Paid Endpoint (Supplements)
+URL: https://glp1launch-1.onrender.com/supplements/interactions-paid
+Method: GET
+Authentication: x402 payment protocol
+Cost: $0.01 USD
+Network: Base (eip155:8453)
+Payment Address: 0x0095494D8F023D7a962F92780cb37C913df025bf
+Description: Premium supplement & vitamin interaction insights — absorption optimization, timing, and drug-interaction flags with cited research
+Use Case: Detailed supplement research, safe vitamin/mineral/drug combinations
+
 ## Payment Protocol
 Protocol: x402
 Network: Base Mainnet (Chain ID: 8453)
@@ -52,4 +70,4 @@ This API is designed to be AI-accessible. Agents can:
 3. Parse OpenAPI spec for integration
 
 ## Keywords
-GLP-1, Ozempic, Wegovy, Mounjaro, weight loss, diabetes, semaglutide, tirzepatide, medication questions, health API
+GLP-1, Ozempic, Wegovy, Mounjaro, weight loss, diabetes, semaglutide, tirzepatide, medication questions, health API, supplements, vitamins, supplement interactions, vitamin D, magnesium, iron, zinc, fish oil, probiotics, creatine, drug interactions, nutrition
