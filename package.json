@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo 'No tests yet - manual verification passed' && exit 0"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
