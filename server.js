@@ -10,6 +10,7 @@ const { getPremiumPayload: getSupplementsPayload } = require('./supplements-data
 const { getPremiumPayload: getPeptidesPayload } = require('./peptides-data');
 
 const app = express();
+app.set('trust proxy', 1); // Render terminates TLS — trust X-Forwarded-Proto so x402 emits https:// resource URLs (required for Bazaar indexing)
 const PORT = process.env.PORT || 3000;
 const PAY_TO = process.env.PAY_TO;
 
