@@ -48,9 +48,18 @@ const data = await res.json();
 - `GET /peptides/longevity-paid` - peptide & longevity briefs
 
 ### Usage stats
-`GET /stats` returns aggregate request counts and paid unlocks. Privacy-safe
-by design: no health queries, wallet addresses, IPs, or user agents are
-collected. Counters are in-memory and reset on redeploy.
+`GET /stats` returns aggregate request, paid-unlock, unique-free, unique-paid,
+and 7-day repeat-paid counts. The browser stores a random first-party ID locally
+and sends only pseudonymous hashes. The HMAC pseudonym rotates at the start of each UTC month, and the random
+HMAC key never leaves the browser. A paid pseudonym with at least two completed
+paid calls in the trailing 7 days counts as repeat paid use. This is pseudonymous measurement, not anonymous or
+"no per-user data" measurement.
+
+The server does not store health queries, wallet addresses, IP addresses, user
+agents, request bodies, payment headers, or query strings. Pseudonyms and
+paid-call timestamps stay in memory; paid timestamps are retained for 8 days. All
+server counters and pseudonymous records reset on restart/redeploy, and clearing
+browser storage creates a new local visitor ID.
 
 ### Data & scoring
 Every premium answer cites named sources with links. `trending_score` is an

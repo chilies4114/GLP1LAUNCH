@@ -271,7 +271,7 @@ const data = await res.json();</pre>
                 <p>
                     Free: <code>GET /glp1/top-questions</code> &middot; <code>GET /supplements/interactions</code> &middot; <code>GET /peptides/longevity</code><br>
                     Paid ($0.01 each via x402): <code>GET /glp1/top-questions-paid</code> &middot; <code>GET /supplements/interactions-paid</code> &middot; <code>GET /peptides/longevity-paid</code><br>
-                    Usage stats: <code>GET /stats</code> (aggregate counts only - no queries, wallets, IPs, or user agents stored)<br>
+                    Usage stats: <code>GET /stats</code> (aggregate counts from pseudonymous browser measurement - no queries, wallets, IPs, or user agents stored)<br>
                     Machine-readable docs: <a href="/openapi.json">openapi.json</a> &middot; <a href="/ai.txt">ai.txt</a>
                 </p>
                 <p>
@@ -286,6 +286,39 @@ const data = await res.json();</pre>
     <script>
         let currentAccount = null;
         let currentChainId = null;
+
+        // Privacy-preserving launch measurement. A random first-party ID stays
+        // in this browser. Only rotating SHA-256 pseudonyms are sent.
+        function getLaunchVisitorId() {
+            const key = 'glp1launch_visitor_v1';
+            let id = localStorage.getItem(key);
+            if (!id) {
+                const bytes = new Uint8Array(32);
+                crypto.getRandomValues(bytes);
+                id = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+                localStorage.setItem(key, id);
+            }
+            return id;
+        }
+
+        async function hmacSha256Hex(keyHex, value) {
+            const keyBytes = Uint8Array.from(keyHex.match(/.{2}/g), byte => parseInt(byte, 16));
+            const key = await crypto.subtle.importKey(
+                'raw', keyBytes, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+            );
+            const digest = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(value));
+            return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function rotationPeriod() { return new Date().toISOString().slice(0, 7); }
+
+        async function launchHeaders() {
+            const localKey = getLaunchVisitorId();
+            // The local random ID is the HMAC key and never leaves this browser.
+            // The resulting pseudonym rotates at the start of each UTC month.
+            const visitor = await hmacSha256Hex(localKey, 'glp1launch:' + rotationPeriod());
+            return { 'X-Launch-Visitor': visitor };
+        }
 
         // Check if MetaMask is installed
         function isMobileDevice() {
@@ -447,7 +480,7 @@ const data = await res.json();</pre>
             responseDiv.textContent = 'Loading...';
 
             try {
-                const response = await fetch('/glp1/top-questions');
+                const response = await fetch('/glp1/top-questions', { headers: await launchHeaders() });
                 const data = await response.json();
                 responseDiv.textContent = JSON.stringify(data, null, 2);
             } catch (error) {
@@ -530,7 +563,7 @@ const data = await res.json();</pre>
 
             try {
                 // 1. Ask the server; expect HTTP 402 with a PAYMENT-REQUIRED header
-                const initial = await fetch('/glp1/top-questions-paid');
+                const initial = await fetch('/glp1/top-questions-paid', { headers: await launchHeaders() });
                 if (initial.ok) {
                     responseDiv.textContent = JSON.stringify(await initial.json(), null, 2);
                     return;
@@ -627,7 +660,10 @@ const data = await res.json();</pre>
                 };
                 responseDiv.textContent = 'Payment signed. Settling on-chain...';
                 const paid = await fetch('/glp1/top-questions-paid', {
-                    headers: { 'PAYMENT-SIGNATURE': b64EncodeUnicode(JSON.stringify(paymentPayload)) }
+                    headers: {
+                        ...(await launchHeaders()),
+                        'PAYMENT-SIGNATURE': b64EncodeUnicode(JSON.stringify(paymentPayload))
+                    }
                 });
 
                 let settlement = null;

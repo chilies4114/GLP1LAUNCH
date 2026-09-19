@@ -10,8 +10,7 @@ const { getPremiumPayload: getSupplementsPayload } = require('./supplements-data
 const { getPremiumPayload: getPeptidesPayload } = require('./peptides-data');
 const { createStats } = require('./stats');
 
-// Privacy-safe aggregate analytics: counts requests per route and paid
-// unlocks only. No health queries, wallet addresses, IPs, or user agents.
+// Privacy-preserving launch analytics. Clients send only rotating pseudonyms.
 const stats = createStats();
 
 const app = express();
@@ -30,7 +29,7 @@ app.use(express.static('public'));
 
 // Aggregate request counter (API routes only; static assets excluded).
 app.use((req, res, next) => {
-  if (req.method === 'GET') stats.track(req.path);
+  if (req.method === 'GET') stats.track(req.path, req.get('x-launch-visitor'));
   next();
 });
 
@@ -229,7 +228,7 @@ app.get('/glp1/top-questions', (req, res) => {
 // Paid endpoint - protected by x402 middleware above.
 // Requests only reach this handler after payment is verified & settled.
 app.get('/glp1/top-questions-paid', (req, res) => {
-  stats.trackPaidUnlock();
+  stats.trackPaidUnlock(req.path, req.get('x-launch-visitor'));
   res.json(getPremiumPayload());
 });
 
@@ -280,7 +279,7 @@ app.get('/supplements/interactions', (req, res) => {
 // Paid endpoint - protected by x402 middleware above.
 // Requests only reach this handler after payment is verified & settled.
 app.get('/supplements/interactions-paid', (req, res) => {
-  stats.trackPaidUnlock();
+  stats.trackPaidUnlock(req.path, req.get('x-launch-visitor'));
   res.json(getSupplementsPayload());
 });
 
@@ -331,11 +330,11 @@ app.get('/peptides/longevity', (req, res) => {
 // Paid endpoint - protected by x402 middleware above.
 // Requests only reach this handler after payment is verified & settled.
 app.get('/peptides/longevity-paid', (req, res) => {
-  stats.trackPaidUnlock();
+  stats.trackPaidUnlock(req.path, req.get('x-launch-visitor'));
   res.json(getPeptidesPayload());
 });
 
-// Aggregate usage stats - counts only, no per-user data (see stats.js)
+// Aggregate usage stats. Pseudonymous inputs are never returned (see stats.js).
 app.get('/stats', (req, res) => {
   res.json({ success: true, ...stats.snapshot() });
 });
