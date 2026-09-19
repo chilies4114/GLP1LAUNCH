@@ -197,12 +197,13 @@
         <div class="warning-box">
             <h3>⚠️ Deployment Note</h3>
             <p>
-                <strong>Your connected MetaMask wallet address will be used as the PAY_TO address for deployment.</strong>
-                This is where payment for the paid endpoint will be sent. Make sure you're connected with the wallet 
-                you want to receive payments on Base network (Chain ID: 8453).
+                <strong>Pay directly from your MetaMask wallet.</strong> When you call the paid endpoint, MetaMask
+                will ask you to sign a $0.01 USDC payment authorization on Base network (Chain ID: 8453).
+                It's a signature, not a transaction - the x402 payment network covers the gas.
             </p>
             <p style="margin-top: 10px;">
-                <strong>Important:</strong> No private keys are stored or transmitted. The payment happens on-chain via x402 protocol.
+                <strong>Important:</strong> No private keys are stored or transmitted. You only sign a payment
+                authorization in MetaMask; settlement happens on-chain via the x402 protocol.
             </p>
         </div>
         
@@ -224,7 +225,7 @@
                     <strong>Requires payment of $0.01 on Base network.</strong>
                 </p>
                 <p style="color: #dc3545; font-weight: 600;">
-                    ⚡ You must connect your MetaMask wallet and be on Base network (Chain ID: 8453) to access this endpoint.
+                    ⚡ Connect your MetaMask wallet to pay - you'll sign a $0.01 USDC authorization on Base (Chain ID: 8453).
                 </p>
                 <button id="paidBtn" onclick="callPaidEndpoint()" disabled>Call Paid Endpoint (Connect Wallet First)</button>
                 <div id="paidResponse" class="response-box" style="display: none;"></div>
@@ -395,32 +396,203 @@
             }
         }
 
-        // Call paid endpoint
+        // ---- x402 browser payment via MetaMask (EIP-3009 transferWithAuthorization) ----
+
+        function b64EncodeUnicode(str) {
+            return btoa(String.fromCharCode.apply(null, new TextEncoder().encode(str)));
+        }
+
+        function b64DecodeUnicode(b64) {
+            const bin = atob(b64);
+            const bytes = Uint8Array.from(bin, c => c.charCodeAt(0));
+            return new TextDecoder().decode(bytes);
+        }
+
+        function randomNonce() {
+            const bytes = new Uint8Array(32);
+            crypto.getRandomValues(bytes);
+            return '0x' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        function networkToChainId(network) {
+            // "eip155:8453" -> 8453
+            return parseInt(String(network).split(':')[1], 10);
+        }
+
+        async function ensureChain(chainIdDecimal) {
+            const current = parseInt(await window.ethereum.request({ method: 'eth_chainId' }), 16);
+            if (current === chainIdDecimal) return;
+            const hex = '0x' + chainIdDecimal.toString(16);
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: hex }],
+                });
+            } catch (switchError) {
+                if (switchError.code === 4902) {
+                    const configs = {
+                        8453: {
+                            chainId: '0x2105',
+                            chainName: 'Base Mainnet',
+                            nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
+                            rpcUrls: ['https://mainnet.base.org'],
+                            blockExplorerUrls: ['https://basescan.org'],
+                        },
+                        84532: {
+                            chainId: '0x14a34',
+                            chainName: 'Base Sepolia Testnet',
+                            nativeCurrency: { name: 'Ethereum', symbol: 'ETH', decimals: 18 },
+                            rpcUrls: ['https://sepolia.base.org'],
+                            blockExplorerUrls: ['https://sepolia.basescan.org'],
+                        },
+                    };
+                    const cfg = configs[chainIdDecimal];
+                    if (!cfg) throw new Error('Unsupported network: ' + chainIdDecimal);
+                    await window.ethereum.request({
+                        method: 'wallet_addEthereumChain',
+                        params: [cfg],
+                    });
+                } else {
+                    throw switchError;
+                }
+            }
+        }
+
+        // Call paid endpoint - full x402 payment flow through MetaMask
         async function callPaidEndpoint() {
             if (!currentAccount) {
                 alert('Please connect your MetaMask wallet first!');
                 return;
             }
 
-            const chainIdDecimal = parseInt(currentChainId, 16);
-            
-            // Check if on Base network
-            if (chainIdDecimal !== 8453) {
-                const confirmed = confirm('You need to be on Base network (Chain ID: 8453) to access the paid endpoint. Switch now?');
-                if (confirmed) {
-                    await switchToBase();
-                }
-                return;
-            }
-
             const responseDiv = document.getElementById('paidResponse');
             responseDiv.style.display = 'block';
-            responseDiv.textContent = 'Loading... (Payment may be required)';
+            responseDiv.textContent = 'Requesting payment requirements...';
 
             try {
-                const response = await fetch('/glp1/top-questions-paid');
-                const data = await response.json();
-                responseDiv.textContent = JSON.stringify(data, null, 2);
+                // 1. Ask the server; expect HTTP 402 with a PAYMENT-REQUIRED header
+                const initial = await fetch('/glp1/top-questions-paid');
+                if (initial.ok) {
+                    responseDiv.textContent = JSON.stringify(await initial.json(), null, 2);
+                    return;
+                }
+                if (initial.status !== 402) {
+                    responseDiv.textContent = 'Unexpected server response: HTTP ' + initial.status;
+                    return;
+                }
+                const prHeader = initial.headers.get('payment-required');
+                if (!prHeader) {
+                    responseDiv.textContent = 'Server asked for payment but sent no PAYMENT-REQUIRED header.';
+                    return;
+                }
+                const paymentRequired = JSON.parse(b64DecodeUnicode(prHeader));
+
+                // 2. Pick an "exact" EVM payment option (USDC via EIP-3009)
+                const evmAccepts = (paymentRequired.accepts || []).filter(
+                    a => a.scheme === 'exact' && String(a.network).indexOf('eip155:') === 0
+                );
+                if (evmAccepts.length === 0) {
+                    responseDiv.textContent = 'The server did not offer a MetaMask-compatible payment option.';
+                    return;
+                }
+                const req = evmAccepts[0];
+                const neededChain = networkToChainId(req.network);
+
+                // 3. Put MetaMask on the required network (adds Base if missing)
+                responseDiv.textContent = 'Switch MetaMask to ' + getNetworkName(neededChain) + ' if prompted...';
+                await ensureChain(neededChain);
+                currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+                updateWalletUI();
+                enablePaidButton();
+
+                // 4. Sign an EIP-3009 transferWithAuthorization (a signature, not a transaction)
+                const now = Math.floor(Date.now() / 1000);
+                const authorization = {
+                    from: currentAccount,
+                    to: req.payTo,
+                    value: String(req.amount),
+                    validAfter: '0',
+                    validBefore: String(now + (req.maxTimeoutSeconds || 300)),
+                    nonce: randomNonce()
+                };
+                const typedData = {
+                    domain: {
+                        name: (req.extra && req.extra.name) || 'USD Coin',
+                        version: (req.extra && req.extra.version) || '2',
+                        chainId: neededChain,
+                        verifyingContract: req.asset
+                    },
+                    primaryType: 'TransferWithAuthorization',
+                    types: {
+                        EIP712Domain: [
+                            { name: 'name', type: 'string' },
+                            { name: 'version', type: 'string' },
+                            { name: 'chainId', type: 'uint256' },
+                            { name: 'verifyingContract', type: 'address' }
+                        ],
+                        TransferWithAuthorization: [
+                            { name: 'from', type: 'address' },
+                            { name: 'to', type: 'address' },
+                            { name: 'value', type: 'uint256' },
+                            { name: 'validAfter', type: 'uint256' },
+                            { name: 'validBefore', type: 'uint256' },
+                            { name: 'nonce', type: 'bytes32' }
+                        ]
+                    },
+                    message: authorization
+                };
+                const usd = (Number(req.amount) / 1e6).toFixed(2);
+                responseDiv.textContent = 'Confirm the $' + usd + ' USDC payment in MetaMask... ' +
+                    '(a signature, not a transaction - the x402 network pays the gas)';
+
+                let signature;
+                try {
+                    signature = await window.ethereum.request({
+                        method: 'eth_signTypedData_v4',
+                        params: [currentAccount, JSON.stringify(typedData)]
+                    });
+                } catch (signError) {
+                    if (signError && signError.code === 4001) {
+                        responseDiv.textContent = 'Payment cancelled in MetaMask.';
+                        return;
+                    }
+                    throw signError;
+                }
+
+                // 5. Retry the request with the signed payment payload
+                const paymentPayload = {
+                    x402Version: 2,
+                    resource: paymentRequired.resource,
+                    accepted: req,
+                    payload: { signature: signature, authorization: authorization }
+                };
+                responseDiv.textContent = 'Payment signed. Settling on-chain...';
+                const paid = await fetch('/glp1/top-questions-paid', {
+                    headers: { 'PAYMENT-SIGNATURE': b64EncodeUnicode(JSON.stringify(paymentPayload)) }
+                });
+
+                let settlement = null;
+                const settlementHeader = paid.headers.get('payment-response');
+                if (settlementHeader) {
+                    try { settlement = JSON.parse(b64DecodeUnicode(settlementHeader)); } catch (e) { /* ignore */ }
+                }
+                let body = null;
+                try { body = await paid.json(); } catch (e) { /* ignore */ }
+
+                if (paid.ok) {
+                    let out = '';
+                    if (settlement && settlement.transaction) {
+                        const explorer = neededChain === 84532 ? 'https://sepolia.basescan.org' : 'https://basescan.org';
+                        out += 'Payment settled: ' + settlement.transaction + '\n' +
+                               explorer + '/tx/' + settlement.transaction + '\n\n';
+                    }
+                    out += JSON.stringify(body, null, 2);
+                    responseDiv.textContent = out;
+                } else {
+                    responseDiv.textContent = 'Payment failed (HTTP ' + paid.status + ')\n' +
+                        (settlement && settlement.errorReason ? 'Reason: ' + settlement.errorReason + '\n\n' : '') +
+                        (body ? JSON.stringify(body, null, 2) : '');
+                }
             } catch (error) {
                 responseDiv.textContent = 'Error: ' + error.message;
             }
