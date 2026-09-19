@@ -13,8 +13,11 @@ const premiumPeptides = [
     trending_score: 93,
     detailed_answer:
       "BPC-157 ('Body Protection Compound') is a synthetic peptide derived from a protein in gastric juice. It is studied primarily in animal models for tissue healing — tendon, ligament, muscle, and gut lining — and appears to promote angiogenesis (new blood vessel formation). Important: BPC-157 is NOT FDA-approved, has no large human trials, and in 2023 the FDA placed it on a list restricting compounding pharmacy use. Most evidence is preclinical (rodent) or anecdotal.",
-    sources: ["J Physiol Pharmacol 2018;69:3", "FDA 503A Bulk Substances Review 2023", "Curr Pharm Des 2018;24:18"],
-    expert_rating: 4.2,
+    sources: [
+      { name: "FDA - Bulk drug substances used in compounding", url: "https://www.fda.gov/drugs/human-drug-compounding/bulk-drug-substances-used-compounding" },
+      { name: "BPC-157 vascular/gut healing review, Curr Pharm Des 2018", url: "https://doi.org/10.2174/1381612824666180608101119" },
+      { name: "Pharmacological properties of BPC 157", url: "https://pubmed.ncbi.nlm.nih.gov/17657443/" },
+    ],
   },
   {
     id: 2,
@@ -23,8 +26,11 @@ const premiumPeptides = [
     trending_score: 81,
     detailed_answer:
       "TB-500 is a synthetic fragment of Thymosin Beta-4, a naturally occurring protein involved in cell migration and repair. It is researched for wound healing, flexibility, and reducing inflammation, largely in animal and veterinary contexts. Like BPC-157, human clinical evidence is minimal, it is not FDA-approved for human use, and it is banned by WADA for athletes. It is frequently paired anecdotally with BPC-157 in 'recovery stacks.'",
-    sources: ["Ann N Y Acad Sci 2012;1269", "WADA Prohibited List", "Expert Opin Biol Ther 2018;18:sup1"],
-    expert_rating: 4.0,
+    sources: [
+      { name: "WADA Prohibited List", url: "https://www.wada-ama.org/en/prohibited-list" },
+      { name: "Annals of the New York Academy of Sciences", url: "https://nyaspubs.onlinelibrary.wiley.com/journal/17496632" },
+      { name: "Expert Opinion on Biological Therapy", url: "https://www.tandfonline.com/" },
+    ],
   },
   {
     id: 3,
@@ -33,8 +39,11 @@ const premiumPeptides = [
     trending_score: 85,
     detailed_answer:
       "Ipamorelin is a selective growth hormone secretagogue — it stimulates the pituitary to release the body's own growth hormone (GH) in a pulsatile way, with minimal effect on cortisol or prolactin. It is studied for GH-related applications and popular in anti-aging/bodybuilding circles, often stacked with CJC-1295. It is not an FDA-approved drug; use is research/compounding-based. Effects on body composition are modest and depend heavily on sleep, training, and diet.",
-    sources: ["Growth Horm IGF Res 2015;25:1", "J Clin Endocrinol Metab 2004;89:5", "Endocrine Reviews GH Axis"],
-    expert_rating: 4.1,
+    sources: [
+      { name: "Growth Hormone & IGF Research", url: "https://www.sciencedirect.com/journal/growth-hormone-and-igf-research" },
+      { name: "Journal of Clinical Endocrinology & Metabolism", url: "https://academic.oup.com/jcem" },
+      { name: "Endocrine Reviews", url: "https://academic.oup.com/edrv" },
+    ],
   },
   {
     id: 4,
@@ -43,8 +52,11 @@ const premiumPeptides = [
     trending_score: 79,
     detailed_answer:
       "CJC-1295 is a growth-hormone-releasing hormone (GHRH) analog that increases the amplitude of GH pulses and has an extended half-life (especially the DAC version). It is commonly combined with Ipamorelin (a GH secretagogue) because they act on complementary pathways — GHRH plus a ghrelin-mimetic — theoretically producing a stronger, more natural GH release. Human safety/efficacy data are limited; neither is FDA-approved for anti-aging.",
-    sources: ["J Clin Endocrinol Metab 2006;91:3", "Clin Pharmacol 2019", "Peptide Therapeutics Review 2020"],
-    expert_rating: 4.0,
+    sources: [
+      { name: "CJC-1295 GH pulsatility, JCEM 2006;91:3", url: "https://doi.org/10.1210/jc.2006-1702" },
+      { name: "Endocrine Society", url: "https://www.endocrine.org/" },
+      { name: "Nature Reviews Drug Discovery", url: "https://www.nature.com/nrd/" },
+    ],
   },
   {
     id: 5,
@@ -53,8 +65,11 @@ const premiumPeptides = [
     trending_score: 90,
     detailed_answer:
       "NMN (nicotinamide mononucleotide) and NR (nicotinamide riboside) are NAD+ precursors. NAD+ declines with age and is central to cellular energy and DNA repair, making it a leading longevity target. Human trials show NMN/NR reliably raise blood NAD+ levels and are generally well-tolerated, but hard evidence for extended human lifespan or reversed aging is still lacking — most dramatic results are in mice. Note: in 2022 the FDA signaled NMN may not be marketable as a supplement, creating regulatory uncertainty.",
-    sources: ["Cell Metab 2018;27:3", "Nature Aging 2021", "FDA NDI Ruling on NMN 2022"],
-    expert_rating: 4.3,
+    sources: [
+      { name: "Nicotinamide healthspan study, Cell Metab 2018;27:3", url: "https://www.cell.com/cell-metabolism/fulltext/S1550-4131(18)30112-8" },
+      { name: "Nature Aging", url: "https://www.nature.com/nataging/" },
+      { name: "FDA response on NMN as a supplement (2022)", url: "https://www.npanational.org/wp-content/uploads/2023/04/FDA-Letter-to-Effepharm.pdf" },
+    ],
   },
   {
     id: 6,
@@ -63,8 +78,11 @@ const premiumPeptides = [
     trending_score: 87,
     detailed_answer:
       "Rapamycin (sirolimus) is an FDA-approved immunosuppressant that inhibits mTOR, a key nutrient-sensing pathway. Intermittent low-dose rapamycin extends lifespan in mice more robustly than almost any other intervention, driving intense interest in 'off-label' longevity use. Human longevity data do not yet exist; risks include immune suppression and metabolic effects. It is prescription-only and should never be self-sourced — this is an area of active clinical trials (e.g., PEARL).",
-    sources: ["Nature 2009;460 (NIA ITP)", "Science Transl Med 2016", "PEARL Trial (clinicaltrials.gov)"],
-    expert_rating: 4.4,
+    sources: [
+      { name: "Rapamycin extends lifespan in mice, Nature 2009;460", url: "https://doi.org/10.1038/nature08221" },
+      { name: "PEARL trial, ClinicalTrials.gov NCT04488601", url: "https://clinicaltrials.gov/study/NCT04488601" },
+      { name: "PEARL trial one-year results, Aging", url: "https://doi.org/10.18632/aging.206235" },
+    ],
   },
   {
     id: 7,
@@ -73,8 +91,11 @@ const premiumPeptides = [
     trending_score: 72,
     detailed_answer:
       "Semax is a synthetic peptide developed in Russia, where it is an approved nootropic/neuroprotective drug (not approved in the US/EU). It is studied for cognitive enhancement, focus, and stroke recovery, and is thought to modulate BDNF and the dopaminergic/serotonergic systems. Evidence outside Russian literature is limited, and quality/purity of research-sourced material is a real concern. Not FDA-approved.",
-    sources: ["Neurosci Behav Physiol 2007;37", "Russian Ministry of Health Registry", "Front Pharmacol 2021 review"],
-    expert_rating: 3.8,
+    sources: [
+      { name: "Neuroscience and Behavioral Physiology (Springer)", url: "https://link.springer.com/journal/11055" },
+      { name: "PubMed", url: "https://pubmed.ncbi.nlm.nih.gov/" },
+      { name: "Frontiers in Pharmacology", url: "https://www.frontiersin.org/journals/pharmacology" },
+    ],
   },
   {
     id: 8,
@@ -83,8 +104,11 @@ const premiumPeptides = [
     trending_score: 83,
     detailed_answer:
       "GHK-Cu is a naturally occurring copper-binding tripeptide that declines with age. It has the strongest evidence of the 'cosmetic' peptides: topical GHK-Cu is shown in controlled studies to improve skin firmness, reduce fine lines, and support wound healing by stimulating collagen and antioxidant pathways. Topical cosmetic use is well-established and low-risk; injectable use for systemic anti-aging is not well-studied in humans.",
-    sources: ["J Cosmet Dermatol 2015;14:1", "Biomed Res Int 2015", "Int J Mol Sci 2018;19:7"],
-    expert_rating: 4.5,
+    sources: [
+      { name: "Copper peptides in regenerative aesthetic dermatology (review)", url: "https://doi.org/10.1002/der2.70067" },
+      { name: "BioMed Research International", url: "https://www.hindawi.com/journals/bmri/" },
+      { name: "International Journal of Molecular Sciences", url: "https://www.mdpi.com/journal/ijms" },
+    ],
   },
   {
     id: 9,
@@ -93,8 +117,11 @@ const premiumPeptides = [
     trending_score: 95,
     detailed_answer:
       "It depends on the peptide. A few are FDA-approved drugs (e.g., semaglutide, tirzepatide, sermorelin). Many popular 'research peptides' (BPC-157, TB-500, CJC-1295, Ipamorelin) are NOT FDA-approved for human use, are sold 'for research use only,' and several were restricted for pharmacy compounding by the FDA in 2023. Buying research-grade peptides for personal injection is a legal gray area with real safety risks (purity, sterility, dosing). Always involve a licensed clinician.",
-    sources: ["FDA 503A/503B Compounding Lists 2023", "FTC Enforcement Actions", "USADA/WADA Guidance"],
-    expert_rating: 4.6,
+    sources: [
+      { name: "FDA - Human drug compounding", url: "https://www.fda.gov/drugs/human-drug-compounding" },
+      { name: "FTC", url: "https://www.ftc.gov/" },
+      { name: "USADA", url: "https://www.usada.org/" },
+    ],
   },
   {
     id: 10,
@@ -103,8 +130,11 @@ const premiumPeptides = [
     trending_score: 84,
     detailed_answer:
       "Senolytics are compounds that selectively clear senescent ('zombie') cells — cells that stop dividing but resist death and secrete inflammatory factors (the SASP) that drive aging. The most-studied combo is dasatinib + quercetin. Mouse studies show impressive healthspan gains, and early human trials (e.g., for idiopathic pulmonary fibrosis and diabetic kidney disease) are underway. It remains experimental for general anti-aging; dasatinib is a prescription chemotherapy drug.",
-    sources: ["Nature Medicine 2018;24", "EBioMedicine 2019;40", "Mayo Clinic Senolytics Program"],
-    expert_rating: 4.3,
+    sources: [
+      { name: "First-in-human senolytics pilot, EBioMedicine 2019;40", url: "https://pmc.ncbi.nlm.nih.gov/articles/PMC6412088/" },
+      { name: "Nature Medicine", url: "https://www.nature.com/nm/" },
+      { name: "Mayo Clinic", url: "https://www.mayoclinic.org/" },
+    ],
   },
   {
     id: 11,
@@ -113,8 +143,11 @@ const premiumPeptides = [
     trending_score: 88,
     detailed_answer:
       "Oral collagen (hydrolyzed collagen peptides) has the broadest human evidence of any peptide supplement. Randomized trials show modest but real improvements in skin elasticity/hydration and reductions in joint pain in some populations. The peptides are broken into amino acids and bioactive di/tripeptides that may signal fibroblasts. It is a food-grade supplement (low risk) — effects are real but moderate, not dramatic, and take 8-12 weeks.",
-    sources: ["J Cosmet Dermatol 2019;18:1", "Nutrients 2019;11:1079", "Appl Physiol Nutr Metab 2017;42"],
-    expert_rating: 4.4,
+    sources: [
+      { name: "Collagen supplement RCT, Nutrients 2019;11:2494", url: "https://www.mdpi.com/2072-6643/11/10/2494" },
+      { name: "Journal of Cosmetic Dermatology", url: "https://onlinelibrary.wiley.com/journal/14732165" },
+      { name: "Applied Physiology, Nutrition, and Metabolism", url: "https://cdnsciencepub.com/journal/apnm" },
+    ],
   },
   {
     id: 12,
@@ -123,8 +156,11 @@ const premiumPeptides = [
     trending_score: 91,
     detailed_answer:
       "Before any peptide or compound, the interventions with the strongest human longevity evidence are unglamorous: regular exercise (especially zone-2 cardio + resistance training), adequate protein, quality sleep (7-9h), not smoking, moderate/no alcohol, maintaining muscle mass and VO2 max, and social connection. VO2 max and grip strength are among the best-validated predictors of all-cause mortality — outperforming most supplements studied to date.",
-    sources: ["JAMA 2018;319:2 (VO2 max)", "Lancet 2018 (alcohol)", "BMJ 2022 (protein & muscle)"],
-    expert_rating: 4.8,
+    sources: [
+      { name: "Cardiorespiratory fitness & mortality, JAMA Netw Open 2018", url: "https://doi.org/10.1001/jamanetworkopen.2018.3605" },
+      { name: "Alcohol use & burden (GBD 2016), Lancet 2018", url: "https://www.thelancet.com/journals/lancet/article/PIIS0140-67361831310-2/fulltext" },
+      { name: "BMJ", url: "https://www.bmj.com/" },
+    ],
   },
 ];
 
@@ -182,16 +218,20 @@ function getPremiumPayload() {
   return {
     success: true,
     message: "Premium peptide & longevity insights (paid access)",
-    version: "1.0",
+    version: "1.1",
     last_updated: lastUpdated,
     disclaimer,
+    scoring: {
+      trending_score:
+        "Editorial priority score (0-100) assigned by the site maintainers to rank question importance. It is not derived from live trend or traffic data.",
+    },
     data: premiumPeptides,
     compound_reference: compoundReference,
     premium_features: {
       detailed_answers: true,
-      expert_sources: true,
+      cited_sources: true,
+      source_links: true,
       cited_research: true,
-      ratings_included: true,
       fda_status_flags: true,
       evidence_level_ratings: true,
       safety_legality_guidance: true,

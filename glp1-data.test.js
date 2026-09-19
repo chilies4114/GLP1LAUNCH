@@ -5,7 +5,8 @@ describe('premium GLP-1 payload', () => {
 
   test('is a successful, versioned payload', () => {
     expect(p.success).toBe(true);
-    expect(p.version).toBe('2.0');
+    expect(p.version).toBe('2.1');
+    expect(p.scoring.trending_score).toMatch(/editorial priority/i);
     expect(typeof p.last_updated).toBe('string');
     expect(p.disclaimer).toMatch(/not medical advice/i);
   });
@@ -19,7 +20,10 @@ describe('premium GLP-1 payload', () => {
     for (const q of p.data) {
       expect(q.detailed_answer.length).toBeGreaterThan(40);
       expect(q.sources.length).toBeGreaterThan(0);
-      expect(q.expert_rating).toBeGreaterThan(0);
+      for (const s of q.sources) {
+        expect(s.name).toBeTruthy();
+        expect(s.url).toMatch(/^https:\/\//);
+      }
       expect(q.category).toBeTruthy();
     }
   });

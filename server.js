@@ -8,6 +8,11 @@ const { declareDiscoveryExtension } = require('@x402/extensions/bazaar');
 const { getPremiumPayload } = require('./glp1-data');
 const { getPremiumPayload: getSupplementsPayload } = require('./supplements-data');
 const { getPremiumPayload: getPeptidesPayload } = require('./peptides-data');
+const { createStats } = require('./stats');
+
+// Privacy-safe aggregate analytics: counts requests per route and paid
+// unlocks only. No health queries, wallet addresses, IPs, or user agents.
+const stats = createStats();
 
 const app = express();
 app.set('trust proxy', 1); // Render terminates TLS — trust X-Forwarded-Proto so x402 emits https:// resource URLs (required for Bazaar indexing)
@@ -22,6 +27,12 @@ const NETWORK = HAS_CDP_KEYS ? 'eip155:8453' : 'eip155:84532';
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
+
+// Aggregate request counter (API routes only; static assets excluded).
+app.use((req, res, next) => {
+  if (req.method === 'GET') stats.track(req.path);
+  next();
+});
 
 // ---- x402 payment middleware (official protocol + Bazaar discovery) ----
 if (PAY_TO) {
@@ -62,8 +73,10 @@ if (PAY_TO) {
                   trending_score: 95,
                   detailed_answer:
                     'GLP-1 (Glucagon-Like Peptide-1) is a hormone naturally produced in your intestines...',
-                  sources: ['NEJM', 'Diabetes Care Journal'],
-                  expert_rating: 4.8,
+                  sources: [
+                  { name: 'STEP-1 trial, NEJM 2021;384:989', url: 'https://www.nejm.org/doi/full/10.1056/NEJMoa2032183' },
+                  { name: 'ADA Standards of Care, Diabetes Care 2022;45:S125', url: 'https://diabetesjournals.org/care/article/45/Supplement_1/S125/138908/9-Pharmacologic-Approaches-to-Glycemic-Treatment' },
+                ],
                 },
               ],
             },
@@ -98,8 +111,10 @@ if (PAY_TO) {
                   trending_score: 94,
                   detailed_answer:
                     'Vitamin D is fat-soluble, so it absorbs best with a meal containing dietary fat...',
-                  sources: ['J Bone Miner Res 2015;30:1', 'NIH ODS Vitamin D Fact Sheet'],
-                  expert_rating: 4.8,
+                  sources: [
+                  { name: 'Dietary fat increases vitamin D3 absorption (2015)', url: 'https://pubmed.ncbi.nlm.nih.gov/25441954/' },
+                  { name: 'NIH ODS Vitamin D Fact Sheet', url: 'https://ods.od.nih.gov/factsheets/VitaminD-HealthProfessional/' },
+                ],
                 },
               ],
             },
@@ -134,8 +149,10 @@ if (PAY_TO) {
                   trending_score: 90,
                   detailed_answer:
                     'NMN and NR are NAD+ precursors. NAD+ declines with age and is central to cellular energy and DNA repair...',
-                  sources: ['Cell Metab 2018;27:3', 'Nature Aging 2021'],
-                  expert_rating: 4.3,
+                  sources: [
+                  { name: 'Nicotinamide healthspan study, Cell Metab 2018;27:3', url: 'https://www.cell.com/cell-metabolism/fulltext/S1550-4131(18)30112-8' },
+                  { name: 'Nature Aging', url: 'https://www.nature.com/nataging/' },
+                ],
                 },
               ],
             },
@@ -170,6 +187,10 @@ app.get('/glp1/top-questions', (req, res) => {
   res.json({
     success: true,
     message: "Top trending GLP-1 questions (free)",
+    scoring: {
+      trending_score:
+        "Editorial priority score (0-100) assigned by the site maintainers to rank question importance. It is not derived from live trend or traffic data."
+    },
     data: [
       {
         id: 1,
@@ -208,6 +229,7 @@ app.get('/glp1/top-questions', (req, res) => {
 // Paid endpoint - protected by x402 middleware above.
 // Requests only reach this handler after payment is verified & settled.
 app.get('/glp1/top-questions-paid', (req, res) => {
+  stats.trackPaidUnlock();
   res.json(getPremiumPayload());
 });
 
@@ -216,6 +238,10 @@ app.get('/supplements/interactions', (req, res) => {
   res.json({
     success: true,
     message: "Top supplement & vitamin interaction questions (free)",
+    scoring: {
+      trending_score:
+        "Editorial priority score (0-100) assigned by the site maintainers to rank question importance. It is not derived from live trend or traffic data."
+    },
     data: [
       {
         id: 1,
@@ -254,6 +280,7 @@ app.get('/supplements/interactions', (req, res) => {
 // Paid endpoint - protected by x402 middleware above.
 // Requests only reach this handler after payment is verified & settled.
 app.get('/supplements/interactions-paid', (req, res) => {
+  stats.trackPaidUnlock();
   res.json(getSupplementsPayload());
 });
 
@@ -262,6 +289,10 @@ app.get('/peptides/longevity', (req, res) => {
   res.json({
     success: true,
     message: "Top peptide & longevity questions (free)",
+    scoring: {
+      trending_score:
+        "Editorial priority score (0-100) assigned by the site maintainers to rank question importance. It is not derived from live trend or traffic data."
+    },
     data: [
       {
         id: 1,
@@ -300,7 +331,13 @@ app.get('/peptides/longevity', (req, res) => {
 // Paid endpoint - protected by x402 middleware above.
 // Requests only reach this handler after payment is verified & settled.
 app.get('/peptides/longevity-paid', (req, res) => {
+  stats.trackPaidUnlock();
   res.json(getPeptidesPayload());
+});
+
+// Aggregate usage stats - counts only, no per-user data (see stats.js)
+app.get('/stats', (req, res) => {
+  res.json({ success: true, ...stats.snapshot() });
 });
 
 // Start server

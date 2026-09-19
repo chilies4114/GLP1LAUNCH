@@ -2,14 +2,11 @@
   "openapi": "3.0.0",
   "info": {
     "title": "GLP1 Launch API",
-    "description": "AI-accessible API for trending GLP-1 medication questions and premium insights. Free and paid endpoints available.",
-    "version": "1.0.0",
+    "description": "AI-accessible API for GLP-1, supplement-interaction, and peptide/longevity research briefs. Free question indexes and $0.01 premium briefs paid via x402 on Base mainnet. Premium answers cite named sources with links. trending_score is an editorial priority score, not live trend data.",
+    "version": "1.1.0",
     "contact": {
       "name": "GLP1 Launch API Support",
       "url": "https://github.com/chilies4114/GLP1LAUNCH"
-    },
-    "x-logo": {
-      "url": "https://glp1launch-1.onrender.com"
     }
   },
   "servers": [
@@ -22,11 +19,10 @@
     "/": {
       "get": {
         "summary": "Health Check",
-        "description": "Returns API status and confirms the service is running",
         "operationId": "healthCheck",
         "responses": {
           "200": {
-            "description": "API is running",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -37,8 +33,58 @@
                       "example": "ok"
                     },
                     "message": {
-                      "type": "string",
-                      "example": "GLP1 API running"
+                      "type": "string"
+                    },
+                    "openapi": {
+                      "type": "string"
+                    },
+                    "ai_info": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/stats": {
+      "get": {
+        "summary": "Aggregate Usage Stats (Free)",
+        "description": "Aggregate request counts per endpoint and paid unlocks. Privacy-safe: no health queries, wallet addresses, IPs, or user agents are collected. In-memory; resets on redeploy.",
+        "operationId": "getStats",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "since": {
+                      "type": "string"
+                    },
+                    "total_requests": {
+                      "type": "integer"
+                    },
+                    "paid_unlocks": {
+                      "type": "integer"
+                    },
+                    "by_endpoint": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "type": "integer"
+                      }
+                    },
+                    "privacy_note": {
+                      "type": "string"
+                    },
+                    "resets_note": {
+                      "type": "string"
                     }
                   }
                 }
@@ -51,12 +97,16 @@
     "/glp1/top-questions": {
       "get": {
         "summary": "Get Trending GLP-1 Questions (Free)",
-        "description": "Returns a list of the top trending GLP-1 medication questions with basic information. No payment required. Great for AI agents to access general GLP-1 information.",
-        "operationId": "getTopQuestions",
-        "tags": ["GLP-1", "Free", "Health"],
+        "description": "Top trending GLP-1 medication questions with basic information. No payment required.",
+        "operationId": "GetTrendingGLP-1Questions",
+        "tags": [
+          "GLP-1",
+          "Free",
+          "Health"
+        ],
         "responses": {
           "200": {
-            "description": "Successful response with trending questions",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -67,6 +117,15 @@
                     },
                     "message": {
                       "type": "string"
+                    },
+                    "scoring": {
+                      "type": "object",
+                      "properties": {
+                        "trending_score": {
+                          "type": "string",
+                          "example": "Editorial priority score (0-100) assigned by the site maintainers to rank question importance. It is not derived from live trend or traffic data."
+                        }
+                      }
                     },
                     "data": {
                       "type": "array",
@@ -83,7 +142,132 @@
                             "type": "string"
                           },
                           "trending_score": {
+                            "type": "integer",
+                            "description": "Editorial priority score 0-100; not derived from live trend data"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/supplements/interactions": {
+      "get": {
+        "summary": "Get Trending Supplement Interaction Questions (Free)",
+        "description": "Top supplement & vitamin interaction questions with basic information. No payment required.",
+        "operationId": "GetTrendingSupplementInteractionQuestions",
+        "tags": [
+          "Supplements",
+          "Free",
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "scoring": {
+                      "type": "object",
+                      "properties": {
+                        "trending_score": {
+                          "type": "string",
+                          "example": "Editorial priority score (0-100) assigned by the site maintainers to rank question importance. It is not derived from live trend or traffic data."
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
                             "type": "integer"
+                          },
+                          "question": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "trending_score": {
+                            "type": "integer",
+                            "description": "Editorial priority score 0-100; not derived from live trend data"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/peptides/longevity": {
+      "get": {
+        "summary": "Get Trending Peptide & Longevity Questions (Free)",
+        "description": "Top peptide & longevity questions with basic information. No payment required.",
+        "operationId": "GetTrendingPeptide&LongevityQuestions",
+        "tags": [
+          "Peptides",
+          "Free",
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "scoring": {
+                      "type": "object",
+                      "properties": {
+                        "trending_score": {
+                          "type": "string",
+                          "example": "Editorial priority score (0-100) assigned by the site maintainers to rank question importance. It is not derived from live trend or traffic data."
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "question": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "trending_score": {
+                            "type": "integer",
+                            "description": "Editorial priority score 0-100; not derived from live trend data"
                           }
                         }
                       }
@@ -98,21 +282,18 @@
     },
     "/glp1/top-questions-paid": {
       "get": {
-        "summary": "Get Premium GLP-1 Insights (Paid - $0.01)",
-        "description": "Returns premium GLP-1 insights with detailed answers, expert sources, ratings, and additional context. Requires payment of $0.01 via x402 protocol on Base network (Chain ID: 8453). Payment address: 0x0095494D8F023D7a962F92780cb37C913df025bf",
-        "operationId": "getTopQuestionsPaid",
-        "tags": ["GLP-1", "Paid", "Premium", "Health"],
-        "x-payment": {
-          "protocol": "x402",
-          "scheme": "exact",
-          "network": "eip155:8453",
-          "price": "0.01",
-          "currency": "USD",
-          "payTo": "0x0095494D8F023D7a962F92780cb37C913df025bf"
-        },
+        "summary": "Get Premium GLP-1 Research Briefs (Paid)",
+        "description": "Premium GLP-1 medication briefs with detailed answers, cited sources with links, dosing schedules, side-effect management, cost strategies, and a drug comparison table. Payment: $0.01 USDC on Base mainnet via the x402 protocol (HTTP 402 + PAYMENT-SIGNATURE).",
+        "operationId": "GetPremiumGLP-1ResearchBriefs",
+        "tags": [
+          "GLP-1",
+          "Paid",
+          "x402",
+          "Health"
+        ],
         "responses": {
           "200": {
-            "description": "Successful response with premium insights (after payment)",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -123,6 +304,24 @@
                     },
                     "message": {
                       "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "last_updated": {
+                      "type": "string"
+                    },
+                    "disclaimer": {
+                      "type": "string"
+                    },
+                    "scoring": {
+                      "type": "object",
+                      "properties": {
+                        "trending_score": {
+                          "type": "string",
+                          "example": "Editorial priority score (0-100) assigned by the site maintainers to rank question importance. It is not derived from live trend or traffic data."
+                        }
+                      }
                     },
                     "data": {
                       "type": "array",
@@ -139,7 +338,8 @@
                             "type": "string"
                           },
                           "trending_score": {
-                            "type": "integer"
+                            "type": "integer",
+                            "description": "Editorial priority score 0-100; not derived from live trend data"
                           },
                           "detailed_answer": {
                             "type": "string"
@@ -147,17 +347,24 @@
                           "sources": {
                             "type": "array",
                             "items": {
-                              "type": "string"
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "url": {
+                                  "type": "string",
+                                  "format": "uri"
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "url"
+                              ]
                             }
-                          },
-                          "expert_rating": {
-                            "type": "number"
                           }
                         }
                       }
-                    },
-                    "premium_features": {
-                      "type": "object"
                     }
                   }
                 }
@@ -165,153 +372,94 @@
             }
           },
           "402": {
-            "description": "Payment Required - Must pay $0.01 on Base network",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "payment_details": {
-                      "type": "object",
-                      "properties": {
-                        "scheme": {
-                          "type": "string"
-                        },
-                        "network": {
-                          "type": "string"
-                        },
-                        "price": {
-                          "type": "string"
-                        },
-                        "payTo": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/supplements/interactions": {
-      "get": {
-        "summary": "Get Supplement & Vitamin Interaction Questions (Free)",
-        "description": "Returns trending supplement and vitamin interaction questions with basic information. No payment required. Great for AI agents to access general supplement/nutrition information.",
-        "operationId": "getSupplementInteractions",
-        "tags": ["Supplements", "Free", "Health"],
-        "responses": {
-          "200": {
-            "description": "Successful response with supplement interaction questions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": { "type": "integer" },
-                          "question": { "type": "string" },
-                          "category": { "type": "string" },
-                          "trending_score": { "type": "integer" }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+            "description": "Payment Required - x402 payment instructions are returned in the PAYMENT-REQUIRED header"
           }
         }
       }
     },
     "/supplements/interactions-paid": {
       "get": {
-        "summary": "Get Premium Supplement Interaction Insights (Paid - $0.01)",
-        "description": "Returns premium supplement & vitamin interaction insights with detailed answers, absorption optimization, timing guidance, drug-interaction flags, expert sources, and ratings. Requires payment of $0.01 via x402 protocol on Base network (Chain ID: 8453). Payment address: 0x0095494D8F023D7a962F92780cb37C913df025bf",
-        "operationId": "getSupplementInteractionsPaid",
-        "tags": ["Supplements", "Paid", "Premium", "Health"],
-        "x-payment": {
-          "protocol": "x402",
-          "scheme": "exact",
-          "network": "eip155:8453",
-          "price": "0.01",
-          "currency": "USD",
-          "payTo": "0x0095494D8F023D7a962F92780cb37C913df025bf"
-        },
+        "summary": "Get Premium Supplement Interaction Briefs (Paid)",
+        "description": "Premium supplement & vitamin interaction briefs: absorption, timing, and drug-interaction flags with cited sources with links, plus a pairing guide. Payment: $0.01 USDC on Base mainnet via the x402 protocol (HTTP 402 + PAYMENT-SIGNATURE).",
+        "operationId": "GetPremiumSupplementInteractionBriefs",
+        "tags": [
+          "Supplements",
+          "Paid",
+          "x402",
+          "Health"
+        ],
         "responses": {
           "200": {
-            "description": "Successful response with premium supplement insights (after payment)",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" },
-                    "data": { "type": "array", "items": { "type": "object" } },
-                    "pairing_guide": { "type": "array", "items": { "type": "object" } },
-                    "premium_features": { "type": "object" }
-                  }
-                }
-              }
-            }
-          },
-          "402": {
-            "description": "Payment Required - Must pay $0.01 on Base network",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": { "type": "string" },
-                    "message": { "type": "string" }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/peptides/longevity": {
-      "get": {
-        "summary": "Get Peptide & Longevity Questions (Free)",
-        "description": "Returns trending peptide and longevity questions with basic information. No payment required. Great for AI agents to access general peptide/longevity information.",
-        "operationId": "getPeptideLongevity",
-        "tags": ["Peptides", "Free", "Health"],
-        "responses": {
-          "200": {
-            "description": "Successful response with peptide & longevity questions",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" },
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "last_updated": {
+                      "type": "string"
+                    },
+                    "disclaimer": {
+                      "type": "string"
+                    },
+                    "scoring": {
+                      "type": "object",
+                      "properties": {
+                        "trending_score": {
+                          "type": "string",
+                          "example": "Editorial priority score (0-100) assigned by the site maintainers to rank question importance. It is not derived from live trend or traffic data."
+                        }
+                      }
+                    },
                     "data": {
                       "type": "array",
                       "items": {
                         "type": "object",
                         "properties": {
-                          "id": { "type": "integer" },
-                          "question": { "type": "string" },
-                          "category": { "type": "string" },
-                          "trending_score": { "type": "integer" }
+                          "id": {
+                            "type": "integer"
+                          },
+                          "question": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "trending_score": {
+                            "type": "integer",
+                            "description": "Editorial priority score 0-100; not derived from live trend data"
+                          },
+                          "detailed_answer": {
+                            "type": "string"
+                          },
+                          "sources": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "url": {
+                                  "type": "string",
+                                  "format": "uri"
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "url"
+                              ]
+                            }
+                          }
                         }
                       }
                     }
@@ -319,88 +467,109 @@
                 }
               }
             }
+          },
+          "402": {
+            "description": "Payment Required - x402 payment instructions are returned in the PAYMENT-REQUIRED header"
           }
         }
       }
     },
     "/peptides/longevity-paid": {
       "get": {
-        "summary": "Get Premium Peptide & Longevity Insights (Paid - $0.01)",
-        "description": "Returns premium peptide & longevity insights with detailed answers, FDA/legal status, evidence levels, safety flags, expert sources, and ratings. Requires payment of $0.01 via x402 protocol on Base network (Chain ID: 8453). Payment address: 0x0095494D8F023D7a962F92780cb37C913df025bf",
-        "operationId": "getPeptideLongevityPaid",
-        "tags": ["Peptides", "Paid", "Premium", "Health"],
-        "x-payment": {
-          "protocol": "x402",
-          "scheme": "exact",
-          "network": "eip155:8453",
-          "price": "0.01",
-          "currency": "USD",
-          "payTo": "0x0095494D8F023D7a962F92780cb37C913df025bf"
-        },
+        "summary": "Get Premium Peptide & Longevity Briefs (Paid)",
+        "description": "Premium peptide & longevity briefs: FDA/legal status, evidence levels, and safety flags with cited sources with links, plus a compound reference table. Payment: $0.01 USDC on Base mainnet via the x402 protocol (HTTP 402 + PAYMENT-SIGNATURE).",
+        "operationId": "GetPremiumPeptide&LongevityBriefs",
+        "tags": [
+          "Peptides",
+          "Paid",
+          "x402",
+          "Health"
+        ],
         "responses": {
           "200": {
-            "description": "Successful response with premium peptide insights (after payment)",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "success": { "type": "boolean" },
-                    "message": { "type": "string" },
-                    "data": { "type": "array", "items": { "type": "object" } },
-                    "compound_reference": { "type": "array", "items": { "type": "object" } },
-                    "premium_features": { "type": "object" }
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "version": {
+                      "type": "string"
+                    },
+                    "last_updated": {
+                      "type": "string"
+                    },
+                    "disclaimer": {
+                      "type": "string"
+                    },
+                    "scoring": {
+                      "type": "object",
+                      "properties": {
+                        "trending_score": {
+                          "type": "string",
+                          "example": "Editorial priority score (0-100) assigned by the site maintainers to rank question importance. It is not derived from live trend or traffic data."
+                        }
+                      }
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "question": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "trending_score": {
+                            "type": "integer",
+                            "description": "Editorial priority score 0-100; not derived from live trend data"
+                          },
+                          "detailed_answer": {
+                            "type": "string"
+                          },
+                          "sources": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string"
+                                },
+                                "url": {
+                                  "type": "string",
+                                  "format": "uri"
+                                }
+                              },
+                              "required": [
+                                "name",
+                                "url"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
                   }
                 }
               }
             }
           },
           "402": {
-            "description": "Payment Required - Must pay $0.01 on Base network",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": { "type": "string" },
-                    "message": { "type": "string" }
-                  }
-                }
-              }
-            }
+            "description": "Payment Required - x402 payment instructions are returned in the PAYMENT-REQUIRED header"
           }
         }
       }
     }
-  },
-  "tags": [
-    {
-      "name": "GLP-1",
-      "description": "GLP-1 medication information and insights"
-    },
-    {
-      "name": "Supplements",
-      "description": "Supplement and vitamin interaction information and insights"
-    },
-    {
-      "name": "Peptides",
-      "description": "Peptide and longevity compound information and insights"
-    },
-    {
-      "name": "Free",
-      "description": "Free endpoints - no payment required"
-    },
-    {
-      "name": "Paid",
-      "description": "Paid endpoints - require micropayment via x402"
-    },
-    {
-      "name": "Premium",
-      "description": "Premium content with detailed answers and expert sources"
-    },
-    {
-      "name": "Health",
-      "description": "Healthcare and medication information"
-    }
-  ]
+  }
 }

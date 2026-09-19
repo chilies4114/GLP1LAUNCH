@@ -187,6 +187,11 @@
             <h2>💳 Wallet Connection</h2>
             <button id="connectBtn" onclick="connectWallet()">Connect MetaMask</button>
             <button id="disconnectBtn" onclick="disconnectWallet()" style="display: none; background: #dc3545;">Disconnect</button>
+            <p id="mobileMmHint" style="display: none; margin-top: 12px;">
+                <strong>On mobile?</strong> Wallets are only available inside the MetaMask app's own browser.
+                Open this page there:
+                <a href="https://metamask.app.link/dapp/glp1launch-1.onrender.com">metamask.app.link/dapp/glp1launch-1.onrender.com</a>
+            </p>
             
             <div id="walletInfo" style="display: none;" class="wallet-info">
                 <p><strong>Connected Address:</strong> <span id="walletAddress"></span></p>
@@ -221,7 +226,7 @@
             <div class="endpoint-group">
                 <h3>GET /glp1/top-questions-paid <span class="badge badge-paid">$0.01 USD</span></h3>
                 <p>
-                    Returns premium GLP-1 insights with detailed answers, expert sources, and ratings. 
+                    Returns premium GLP-1 research briefs with detailed answers and cited sources with links. 
                     <strong>Requires payment of $0.01 on Base network.</strong>
                 </p>
                 <p style="color: #dc3545; font-weight: 600;">
@@ -231,6 +236,51 @@
                 <div id="paidResponse" class="response-box" style="display: none;"></div>
             </div>
         </div>
+
+        <!-- Developer Quickstart Section -->
+        <div class="api-section">
+            <h2>&#9889; 60-Second Quickstart (Developers &amp; AI Agents)</h2>
+
+            <div class="endpoint-group">
+                <h3>1. Free call <span class="badge badge-free">FREE</span></h3>
+                <p>No wallet needed:</p>
+                <pre style="background: #1e1e2e; color: #a6e3a1; padding: 12px; border-radius: 8px; overflow-x: auto;">curl https://glp1launch-1.onrender.com/glp1/top-questions</pre>
+            </div>
+
+            <div class="endpoint-group">
+                <h3>2. Paid call <span class="badge badge-paid">$0.01 USD</span></h3>
+                <p>Pay per call with USDC on Base via the x402 protocol:</p>
+                <pre style="background: #1e1e2e; color: #a6e3a1; padding: 12px; border-radius: 8px; overflow-x: auto;">npm install @x402/fetch @x402/evm viem</pre>
+                <pre style="background: #1e1e2e; color: #a6e3a1; padding: 12px; border-radius: 8px; overflow-x: auto;">import { wrapFetchWithPaymentFromConfig } from "@x402/fetch";
+import { ExactEvmScheme } from "@x402/evm";
+import { privateKeyToAccount } from "viem/accounts";
+
+const account = privateKeyToAccount("0xYourPrivateKey"); // wallet with USDC on Base
+const fetchWithPayment = wrapFetchWithPaymentFromConfig(fetch, {
+  schemes: [{ network: "eip155:8453", client: new ExactEvmScheme(account) }],
+});
+
+const res = await fetchWithPayment(
+  "https://glp1launch-1.onrender.com/glp1/top-questions-paid"
+);
+const data = await res.json();</pre>
+            </div>
+
+            <div class="endpoint-group">
+                <h3>All endpoints</h3>
+                <p>
+                    Free: <code>GET /glp1/top-questions</code> &middot; <code>GET /supplements/interactions</code> &middot; <code>GET /peptides/longevity</code><br>
+                    Paid ($0.01 each via x402): <code>GET /glp1/top-questions-paid</code> &middot; <code>GET /supplements/interactions-paid</code> &middot; <code>GET /peptides/longevity-paid</code><br>
+                    Usage stats: <code>GET /stats</code> (aggregate counts only - no queries, wallets, IPs, or user agents stored)<br>
+                    Machine-readable docs: <a href="/openapi.json">openapi.json</a> &middot; <a href="/ai.txt">ai.txt</a>
+                </p>
+                <p>
+                    Premium answers cite named sources with links. <code>trending_score</code> is an editorial
+                    priority score (0-100) set by the maintainers to rank question importance - it is not
+                    derived from live trend or traffic data.
+                </p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -238,9 +288,18 @@
         let currentChainId = null;
 
         // Check if MetaMask is installed
+        function isMobileDevice() {
+            return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        }
+
         function checkMetaMask() {
             if (typeof window.ethereum === 'undefined') {
-                alert('MetaMask is not installed! Please install MetaMask to use this app.');
+                if (isMobileDevice()) {
+                    document.getElementById('mobileMmHint').style.display = 'block';
+                    alert("On mobile, open this page inside the MetaMask app's built-in browser to connect your wallet. Tap the link shown under the connect button.");
+                } else {
+                    alert('MetaMask is not installed! Please install MetaMask to use this app.');
+                }
                 return false;
             }
             return true;
@@ -589,9 +648,20 @@
                     out += JSON.stringify(body, null, 2);
                     responseDiv.textContent = out;
                 } else {
+                    // The middleware embeds the facilitator's exact rejection reason
+                    // in the retry response's PAYMENT-REQUIRED header - surface it.
+                    let failReason = '';
+                    const retryPrHeader = paid.headers.get('payment-required');
+                    if (retryPrHeader) {
+                        try {
+                            const pr2 = JSON.parse(b64DecodeUnicode(retryPrHeader));
+                            if (pr2 && pr2.error) failReason = pr2.error;
+                        } catch (e) { /* ignore */ }
+                    }
                     responseDiv.textContent = 'Payment failed (HTTP ' + paid.status + ')\n' +
-                        (settlement && settlement.errorReason ? 'Reason: ' + settlement.errorReason + '\n\n' : '') +
-                        (body ? JSON.stringify(body, null, 2) : '');
+                        (failReason ? 'Reason: ' + failReason + '\n\n' : '') +
+                        (settlement && settlement.errorReason ? 'Settlement: ' + settlement.errorReason + '\n\n' : '') +
+                        (body && Object.keys(body).length ? JSON.stringify(body, null, 2) : '');
                 }
             } catch (error) {
                 responseDiv.textContent = 'Error: ' + error.message;
@@ -614,6 +684,11 @@
                 }
             }
         });
+
+        // Surface the MetaMask-app hint immediately for mobile visitors
+        if (isMobileDevice() && typeof window.ethereum === 'undefined') {
+            document.getElementById('mobileMmHint').style.display = 'block';
+        }
     </script>
 </body>
 </html>

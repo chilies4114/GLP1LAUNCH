@@ -26,7 +26,7 @@ Authentication: x402 payment protocol
 Cost: $0.01 USD
 Network: Base (eip155:8453)
 Payment Address: 0x0095494D8F023D7a962F92780cb37C913df025bf
-Description: Premium GLP-1 insights with detailed answers, expert sources, and ratings
+Description: Premium GLP-1 research briefs with detailed answers and cited sources with links
 Use Case: Detailed GLP-1 research, expert-backed health information
 
 ### Free Endpoint (Supplements)
@@ -64,6 +64,20 @@ Network: Base (eip155:8453)
 Payment Address: 0x0095494D8F023D7a962F92780cb37C913df025bf
 Description: Premium peptide & longevity insights — FDA/legal status, evidence levels, and safety flags with cited research
 Use Case: Detailed peptide/longevity research, anti-aging compound safety and evidence
+
+### Usage Stats
+URL: https://glp1launch-1.onrender.com/stats
+Method: GET
+Authentication: None
+Cost: Free
+Description: Aggregate usage counts (requests per endpoint, paid unlocks). No health queries, wallet addresses, IPs, or user agents are collected.
+
+## Quickstart
+Free call: curl https://glp1launch-1.onrender.com/glp1/top-questions
+Paid call: use @x402/fetch with an EVM signer on eip155:8453 (Base mainnet); see README 60-Second Quickstart: https://github.com/chilies4114/GLP1LAUNCH
+
+## Scoring
+trending_score is an editorial priority score (0-100) assigned by the maintainers to rank question importance; it is not derived from live trend or traffic data.
 
 ## Payment Protocol
 Protocol: x402
