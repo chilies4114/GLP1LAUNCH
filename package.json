@@ -19,7 +19,8 @@
     "@x402/fetch": "^2.20.0",
     "dotenv": "^17.4.2",
     "ethers": "^6.17.0",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "pg": "^8.23.0"
   },
   "devDependencies": {
     "jest": "^30.4.2"

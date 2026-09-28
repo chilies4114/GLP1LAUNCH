@@ -8,7 +8,7 @@ const { declareDiscoveryExtension } = require('@x402/extensions/bazaar');
 const { getPremiumPayload } = require('./glp1-data');
 const { getPremiumPayload: getSupplementsPayload } = require('./supplements-data');
 const { getPremiumPayload: getPeptidesPayload } = require('./peptides-data');
-const { createStats } = require('./stats');
+const { createStats, API_PATHS } = require('./stats');
 
 // Privacy-preserving launch analytics. Clients send only rotating pseudonyms.
 const stats = createStats();
@@ -28,8 +28,8 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Aggregate request counter (API routes only; static assets excluded).
-app.use((req, res, next) => {
-  if (req.method === 'GET') stats.track(req.path, req.get('x-launch-visitor'));
+app.use(async (req, res, next) => {
+  if (req.method === 'GET' && API_PATHS.has(req.path)) await stats.track(req.path, req.get('x-launch-visitor'));
   next();
 });
 
@@ -227,9 +227,10 @@ app.get('/glp1/top-questions', (req, res) => {
 
 // Paid endpoint - protected by x402 middleware above.
 // Requests only reach this handler after payment is verified & settled.
-app.get('/glp1/top-questions-paid', (req, res) => {
-  stats.trackPaidUnlock(req.path, req.get('x-launch-visitor'));
-  res.json(getPremiumPayload());
+app.get('/glp1/top-questions-paid', async (req, res) => {
+  const payload = getPremiumPayload();
+  await stats.trackPaidUnlock(req.path, req.get('x-launch-visitor'));
+  res.json(payload);
 });
 
 // Free endpoint - Supplement & vitamin interaction basics
@@ -278,9 +279,10 @@ app.get('/supplements/interactions', (req, res) => {
 
 // Paid endpoint - protected by x402 middleware above.
 // Requests only reach this handler after payment is verified & settled.
-app.get('/supplements/interactions-paid', (req, res) => {
-  stats.trackPaidUnlock(req.path, req.get('x-launch-visitor'));
-  res.json(getSupplementsPayload());
+app.get('/supplements/interactions-paid', async (req, res) => {
+  const payload = getSupplementsPayload();
+  await stats.trackPaidUnlock(req.path, req.get('x-launch-visitor'));
+  res.json(payload);
 });
 
 // Free endpoint - Peptide & longevity basics
@@ -329,14 +331,19 @@ app.get('/peptides/longevity', (req, res) => {
 
 // Paid endpoint - protected by x402 middleware above.
 // Requests only reach this handler after payment is verified & settled.
-app.get('/peptides/longevity-paid', (req, res) => {
-  stats.trackPaidUnlock(req.path, req.get('x-launch-visitor'));
-  res.json(getPeptidesPayload());
+app.get('/peptides/longevity-paid', async (req, res) => {
+  const payload = getPeptidesPayload();
+  await stats.trackPaidUnlock(req.path, req.get('x-launch-visitor'));
+  res.json(payload);
 });
 
 // Aggregate usage stats. Pseudonymous inputs are never returned (see stats.js).
-app.get('/stats', (req, res) => {
-  res.json({ success: true, ...stats.snapshot() });
+app.get('/stats', async (req, res) => {
+  try { res.json({ success: true, ...await stats.snapshot() }); }
+  catch (err) {
+    console.warn(`Metrics read failed: ${err.code || err.name || 'error'}`);
+    res.status(503).json({ success: false, metrics_status: 'unavailable', message: 'Persistent metrics unavailable; no totals shown.' });
+  }
 });
 
 // Start server
