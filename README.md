@@ -57,9 +57,11 @@ paid calls in the trailing 7 days counts as repeat paid use. This is pseudonymou
 
 The server does not store health queries, wallet addresses, IP addresses, user
 agents, request bodies, payment headers, or query strings. Pseudonyms and
-paid-call timestamps stay in memory; paid timestamps are retained for 8 days. All
-server counters and pseudonymous records reset on restart/redeploy, and clearing
-browser storage creates a new local visitor ID.
+paid-call timestamps persist in Neon Postgres. Repeat paid use is measured over the trailing 7 days.
+Counters and pseudonymous records survive restart/redeploy. Measurement starts
+September 27, 2026; earlier in-memory counts were not backfilled. Database outages
+can undercount requests and paid unlocks. Clearing browser storage creates a new
+local visitor ID.
 
 ### Data & scoring
 Every premium answer cites named sources with links. `trending_score` is an
