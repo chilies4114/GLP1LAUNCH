@@ -53,7 +53,7 @@ if (PAY_TO) {
         price: '$0.01',
       },
       description:
-        'Premium GLP-1 medication insights: top trending questions with detailed expert answers, cited sources (NEJM, FDA, clinical trials), and expert ratings. Ideal for AI agents answering health queries about Ozempic, Wegovy, Mounjaro, and GLP-1 therapies.',
+        'GLP-1 research briefs for developers and AI agents: fixed question indexes, detailed answers, and named source links. Scores reflect editorial priority, not live trends or expert ratings. Research information, not medical advice.',
       mimeType: 'application/json',
       serviceName: 'GLP1 Launch API',
       tags: ['health', 'glp-1', 'medication', 'weight-loss', 'medical-data'],
