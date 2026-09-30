@@ -52,7 +52,7 @@
     "/stats": {
       "get": {
         "summary": "Aggregate Usage Stats (Free)",
-        "description": "Aggregate request counts per endpoint and paid unlocks. Privacy-safe: no health queries, wallet addresses, IPs, or user agents are collected. In-memory; resets on redeploy.",
+        "description": "Aggregate request counts per endpoint and paid unlocks. Privacy-safe: no health queries, wallet addresses, IPs, or user agents are collected. Counters and pseudonymous records persist in Neon Postgres across restart/redeploy. Measurement starts September 27, 2026, with no backfill of earlier in-memory counts. Untagged API clients count as requests, not unique users; unique counts are client pseudonyms, not verified people. Database outages can undercount requests and paid unlocks.",
         "operationId": "getStats",
         "responses": {
           "200": {
